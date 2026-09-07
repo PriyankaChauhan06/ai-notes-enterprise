@@ -1,0 +1,48 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bookGradient" x1="105" y1="110" x2="407" y2="408" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5B5FEF"/>
+      <stop offset="1" stop-color="#8B3DFF"/>
+    </linearGradient>
+    <linearGradient id="sparkGradient" x1="255" y1="38" x2="315" y2="105" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C83FF"/>
+      <stop offset="1" stop-color="#B06CFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Spark -->
+  <path d="M256 34L265 58L289 67L265 76L256 100L247 76L223 67L247 58L256 34Z"
+        fill="url(#sparkGradient)"/>
+
+  <!-- Open book -->
+  <path d="M78 176C118 146 164 142 214 159V390C165 373 120 377 78 407V176Z"
+        fill="url(#bookGradient)"/>
+  <path d="M434 176C394 146 348 142 298 159V390C347 373 392 377 434 407V176Z"
+        fill="url(#bookGradient)"/>
+
+  <!-- Book center -->
+  <path d="M256 162V392" stroke="#1E2450" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Lower pages -->
+  <path d="M78 407C120 377 165 373 214 390" stroke="#1E2450" stroke-width="10" stroke-linecap="round"/>
+  <path d="M434 407C392 377 347 373 298 390" stroke="#1E2450" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Page highlights -->
+  <path d="M112 214C141 195 170 192 199 200" stroke="white" stroke-opacity=".72" stroke-width="9" stroke-linecap="round"/>
+  <path d="M112 247C141 228 170 225 199 233" stroke="white" stroke-opacity=".56" stroke-width="9" stroke-linecap="round"/>
+  <path d="M313 200C342 192 371 195 400 214" stroke="white" stroke-opacity=".72" stroke-width="9" stroke-linecap="round"/>
+  <path d="M313 233C342 225 371 228 400 247" stroke="white" stroke-opacity=".56" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- Small AI stars -->
+  <path d="M183 111L189 127L205 133L189 139L183 155L177 139L161 133L177 127L183 111Z"
+        fill="#FFD166"/>
+  <path d="M331 105L337 121L353 127L337 133L331 149L325 133L309 127L325 121L331 105Z"
+        fill="#FFD166"/>
+
+  <!-- Wordmark -->
+  <text x="256" y="468" text-anchor="middle"
+        font-family="Inter, Arial, Helvetica, sans-serif"
+        font-size="56" font-weight="800" fill="#171B3A">
+    Note<tspan fill="#7C4DFF">Mind</tspan>
+  </text>
+</svg>

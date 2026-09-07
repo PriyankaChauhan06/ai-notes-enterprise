@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+html,
+body {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  font-family: sans-serif;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0px;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  cursor: pointer;
+}
