@@ -1,9 +1,11 @@
+import AppRoutes from "./routes/AppRoutes";
+import { NotesProvider } from "./contexts/NotesContext";
+
 function App() {
   return (
-    <div>
-      <h1>AI Notes Enterprise</h1>
-      <p>Welcome to our project 🚀</p>
-    </div>
+    <NotesProvider>
+      <AppRoutes />
+    </NotesProvider>
   );
 }
 
