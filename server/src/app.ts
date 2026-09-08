@@ -21,6 +21,11 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+app.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  next();
+});
+
 app.use("/api/note", noteRoutes);
 app.use(errorHandler);
 
