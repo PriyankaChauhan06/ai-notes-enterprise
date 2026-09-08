@@ -7,6 +7,7 @@ import {
   deleteNote,
 } from "../services/note.service";
 import { AppError } from "../utils/AppError";
+import { getParamId, isValidNoteId } from "../utils/is-valid-object-id";
 
 // Create Note
 export async function createNoteController(req: Request, res: Response) {
@@ -22,8 +23,11 @@ export async function getNotesController(_req: Request, res: Response) {
 
 // Get Note by ID
 export async function getNoteByIdController(req: Request, res: Response) {
-  const { id } = req.params;
-  const note = await getNoteById(id as string);
+  const id = getParamId(req.params.id);
+
+  if (!isValidNoteId(id)) throw new AppError("Invalid note id", 400);
+
+  const note = await getNoteById(id);
   if (!note) throw new AppError("Note not found", 404);
 
   res.status(200).json({ success: true, data: note });
@@ -31,8 +35,11 @@ export async function getNoteByIdController(req: Request, res: Response) {
 
 // Update Note
 export async function updateNoteController(req: Request, res: Response) {
-  const { id } = req.params;
-  const note = await updateNote(id as string, req.body);
+  const id = getParamId(req.params.id);
+
+  if (!isValidNoteId(id)) throw new AppError("Invalid note id", 400);
+
+  const note = await updateNote(id, req.body);
   if (!note) throw new AppError("Note not found", 404);
 
   res.status(200).json({ success: true, data: note });
@@ -40,8 +47,11 @@ export async function updateNoteController(req: Request, res: Response) {
 
 // Delete Note
 export async function deleteNoteController(req: Request, res: Response) {
-  const { id } = req.params;
-  const note = await deleteNote(id as string);
+  const id = getParamId(req.params.id);
+
+  if (!isValidNoteId(id)) throw new AppError("Invalid note id", 400);
+
+  const note = await deleteNote(id);
   if (!note) throw new AppError("Note not found", 404);
 
   res.status(200).json({
