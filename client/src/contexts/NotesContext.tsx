@@ -12,13 +12,15 @@ interface NotesContextValue {
     category: Note["category"];
     tags: Note["tags"];
     source: Note["source"];
-  }) => void;
+  }) => Promise<void>;
 
-  updateNote: (note: Note) => void;
+  updateNote: (note: Note) => Promise<void>;
 
-  deleteNote: (id: Note["id"]) => void;
+  deleteNote: (id: Note["id"]) => Promise<void>;
 
-  toggleFavorite: (id: Note["id"]) => void;
+  toggleFavorite: (id: Note["id"]) => Promise<void>;
+
+  isLoading: boolean;
 }
 
 const NotesContext = createContext<NotesContextValue | undefined>(undefined);

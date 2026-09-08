@@ -1,8 +1,10 @@
-import { useCallback } from "react";
-
-import useLocalStorage from "./useLocalStorage";
-import { DEFAULT_NOTES } from "../constants/default-notes";
-import { STORAGE_KEYS } from "../constants/storage-keys";
+import { useCallback, useEffect, useState } from "react";
+import {
+  createNote as createNoteApi,
+  deleteNote as deleteNoteApi,
+  getNotes,
+  updateNote as updateNoteApi,
+} from "../services/note.service";
 
 import type { Note } from "../types/note";
 
@@ -15,68 +17,76 @@ interface CreateNoteData {
 }
 
 function useNotes() {
-  const [notes, setNotes] = useLocalStorage<Note[]>(
-    STORAGE_KEYS.NOTES,
-    DEFAULT_NOTES,
-  );
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const addNote = useCallback(
-    ({ title, description, category, tags, source }: CreateNoteData) => {
-      const newNote: Note = {
-        id: Date.now(),
-        title,
-        description,
-        category,
-        tags,
-        source,
-        isFavorite: false,
-      };
+  const loadNotes = useCallback(async () => {
+    try {
+      setIsLoading(true);
 
-      setNotes((currentNotes) => [...currentNotes, newNote]);
-    },
-    [setNotes],
-  );
+      const data = await getNotes();
 
-  const updateNote = useCallback(
-    (updatedNote: Note) => {
-      setNotes((currentNotes) =>
-        currentNotes.map((note) =>
-          note.id === updatedNote.id ? updatedNote : note,
-        ),
-      );
-    },
-    [setNotes],
-  );
+      setNotes(data);
+    } catch (error) {
+      console.error("Failed to load notes:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const deleteNote = useCallback(
-    (id: Note["id"]) => {
-      setNotes((currentNotes) => currentNotes.filter((note) => note.id !== id));
-    },
-    [setNotes],
-  );
+  useEffect(() => {
+    loadNotes();
+  }, [loadNotes]);
+
+  const addNote = useCallback(async (data: CreateNoteData) => {
+    const newNote = await createNoteApi(data);
+
+    setNotes((currentNotes) => [newNote, ...currentNotes]);
+  }, []);
+
+  const updateNote = useCallback(async (updatedNote: Note) => {
+    const savedNote = await updateNoteApi(updatedNote.id, {
+      title: updatedNote.title,
+      description: updatedNote.description,
+      category: updatedNote.category,
+      tags: updatedNote.tags,
+      isFavorite: updatedNote.isFavorite,
+      source: updatedNote.source,
+    });
+
+    setNotes((currentNotes) =>
+      currentNotes.map((note) => (note.id === savedNote.id ? savedNote : note)),
+    );
+  }, []);
+
+  const deleteNote = useCallback(async (id: Note["id"]) => {
+    await deleteNoteApi(id);
+
+    setNotes((currentNotes) => currentNotes.filter((note) => note.id !== id));
+  }, []);
 
   const toggleFavorite = useCallback(
-    (id: Note["id"]) => {
-      setNotes((currentNotes) =>
-        currentNotes.map((note) =>
-          note.id === id
-            ? {
-                ...note,
-                isFavorite: !note.isFavorite,
-              }
-            : note,
-        ),
-      );
+    async (id: Note["id"]) => {
+      const currentNote = notes.find((note) => note.id === id);
+
+      if (!currentNote) return;
+
+      await updateNote({
+        ...currentNote,
+        isFavorite: !currentNote.isFavorite,
+      });
     },
-    [setNotes],
+    [notes, updateNote],
   );
 
   return {
     notes,
+    isLoading,
     addNote,
     updateNote,
     deleteNote,
     toggleFavorite,
+    loadNotes,
   };
 }
 
