@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 
 import noteRoutes from "./routes/note.routes";
+import { errorHandler } from "./middlewares/error.middleware";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-app.use("/api", noteRoutes);
+app.use("/api/note", noteRoutes);
+app.use(errorHandler);
 
 export default app;
