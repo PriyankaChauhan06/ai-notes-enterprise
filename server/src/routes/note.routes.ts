@@ -23,7 +23,7 @@ router.post(
   asyncHandler(createNoteController),
 );
 
-router.get("/fetch", asyncHandler(getNotesController));
+router.get("/fetchAll", asyncHandler(getNotesController));
 
 router.get("/fetch/:id", asyncHandler(getNoteByIdController));
 
