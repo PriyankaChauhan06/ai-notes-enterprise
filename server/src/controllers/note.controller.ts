@@ -1,21 +1,52 @@
 import type { Request, Response } from "express";
+import {
+  createNote,
+  getNotes,
+  getNoteById,
+  updateNote,
+  deleteNote,
+} from "../services/note.service";
+import { AppError } from "../utils/AppError";
 
-import { createNote } from "../services/note.service";
-
+// Create Note
 export async function createNoteController(req: Request, res: Response) {
-  try {
-    const note = await createNote(req.body);
+  const note = await createNote(req.body);
+  res.status(201).json({ success: true, data: note });
+}
 
-    res.status(201).json({
-      success: true,
-      data: note,
-    });
-  } catch (error) {
-    console.error("Create note error:", error);
+// Get All Notes
+export async function getNotesController(_req: Request, res: Response) {
+  const notes = await getNotes();
+  res.status(200).json({ success: true, data: notes });
+}
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to create note",
-    });
-  }
+// Get Note by ID
+export async function getNoteByIdController(req: Request, res: Response) {
+  const { id } = req.params;
+  const note = await getNoteById(id as string);
+  if (!note) throw new AppError("Note not found", 404);
+
+  res.status(200).json({ success: true, data: note });
+}
+
+// Update Note
+export async function updateNoteController(req: Request, res: Response) {
+  const { id } = req.params;
+  const note = await updateNote(id as string, req.body);
+  if (!note) throw new AppError("Note not found", 404);
+
+  res.status(200).json({ success: true, data: note });
+}
+
+// Delete Note
+export async function deleteNoteController(req: Request, res: Response) {
+  const { id } = req.params;
+  const note = await deleteNote(id as string);
+  if (!note) throw new AppError("Note not found", 404);
+
+  res.status(200).json({
+    success: true,
+    message: "Note deleted successfully",
+    data: note,
+  });
 }
