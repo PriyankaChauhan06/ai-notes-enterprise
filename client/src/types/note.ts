@@ -1,9 +1,11 @@
 export interface Note {
-  id: number;
+  id: string;
   title: string;
   description: string;
   category: string;
   tags: string[];
   isFavorite: boolean;
   source: "manual" | "ai";
+  createdAt?: string;
+  updatedAt?: string;
 }

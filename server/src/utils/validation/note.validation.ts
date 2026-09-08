@@ -8,4 +8,6 @@ export const createNoteSchema = z.object({
   source: z.enum(["manual", "ai"]).default("manual"),
 });
 
-export const updateNoteSchema = createNoteSchema.partial();
+export const updateNoteSchema = createNoteSchema.partial().extend({
+  isFavorite: z.boolean().optional(),
+});

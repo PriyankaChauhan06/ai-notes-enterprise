@@ -2,7 +2,7 @@ import type { Note } from "../types/note";
 
 export const DEFAULT_NOTES: Note[] = [
   {
-    id: 1,
+    id: "1",
     title: "Learn React",
     description: "Complete useState and useEffect.",
     category: "React",
@@ -11,7 +11,7 @@ export const DEFAULT_NOTES: Note[] = [
     source: "manual",
   },
   {
-    id: 2,
+    id: "2",
     title: "Redis Basics",
     description: "Learn caching and Redis fundamentals.",
     category: "Backend",

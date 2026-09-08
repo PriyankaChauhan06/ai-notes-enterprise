@@ -21,32 +21,36 @@ function Notes() {
     setIsNoteDialogOpen(true);
   };
 
-  const handleSaveNote = (
+  const handleSaveNote = async (
     title: string,
     description: string,
     category: string,
     tags: string[],
   ) => {
-    if (editingNote) {
-      updateNote({
-        ...editingNote,
-        title,
-        description,
-        category,
-        tags,
-      });
-    } else {
-      addNote({
-        title,
-        description,
-        category,
-        tags,
-        source: "manual",
-      });
-    }
+    try {
+      if (editingNote) {
+        await updateNote({
+          ...editingNote,
+          title,
+          description,
+          category,
+          tags,
+        });
+      } else {
+        await addNote({
+          title,
+          description,
+          category,
+          tags,
+          source: "manual",
+        });
+      }
 
-    setIsNoteDialogOpen(false);
-    setEditingNote(null);
+      setIsNoteDialogOpen(false);
+      setEditingNote(null);
+    } catch (error) {
+      console.error("Failed to save note:", error);
+    }
   };
 
   const filteredNotes = useMemo(() => {
@@ -149,6 +153,7 @@ function Notes() {
               </p>
 
               <div className="mt-4 flex gap-2">
+                {/* Edit */}
                 <Button
                   variant="secondary"
                   onClick={() => handleEditNote(note)}
@@ -156,6 +161,7 @@ function Notes() {
                   Edit
                 </Button>
 
+                {/* Favorite */}
                 <Button
                   variant="secondary"
                   onClick={() => toggleFavorite(note.id)}
@@ -163,14 +169,19 @@ function Notes() {
                   {note.isFavorite ? "⭐ Unfavorite" : "☆ Favorite"}
                 </Button>
 
+                {/* Delete */}
                 <Button
                   variant="danger"
-                  onClick={() => {
-                    deleteNote(note.id);
+                  onClick={async () => {
+                    try {
+                      await deleteNote(note.id);
 
-                    if (editingNote?.id === note.id) {
-                      setEditingNote(null);
-                      setIsNoteDialogOpen(false);
+                      if (editingNote?.id === note.id) {
+                        setEditingNote(null);
+                        setIsNoteDialogOpen(false);
+                      }
+                    } catch (error) {
+                      console.error("Failed to delete note:", error);
                     }
                   }}
                 >
