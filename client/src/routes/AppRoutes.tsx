@@ -6,6 +6,7 @@ import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
 import Dashboard from "../pages/Dashboard";
 import AIAssistant from "../pages/AIAssistant";
+import ProtectedRoute from "./ProtectedRoute";
 import { DashboardLayout } from "../layouts/index";
 
 function AppRoutes() {
@@ -13,10 +14,12 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route element={<DashboardLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/notes" element={<Notes />} />
-        <Route path="/ai-assistant" element={<AIAssistant />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/notes" element={<Notes />} />
+          <Route path="/ai-assistant" element={<AIAssistant />} />
+        </Route>
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

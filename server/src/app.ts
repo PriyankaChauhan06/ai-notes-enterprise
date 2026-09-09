@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 
+import authRoutes from "./routes/auth.routes";
 import noteRoutes from "./routes/note.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/note", noteRoutes);
 app.use(errorHandler);
 

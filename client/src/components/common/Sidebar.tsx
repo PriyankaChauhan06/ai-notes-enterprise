@@ -1,6 +1,9 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 function Sidebar() {
+  const { logout } = useAuth();
+
   const navItems = [
     {
       label: "Dashboard",
@@ -38,6 +41,14 @@ function Sidebar() {
             {item.label}
           </NavLink>
         ))}
+
+        <button
+          type="button"
+          onClick={logout}
+          className="mt-2 block w-full rounded-lg px-4 py-3 text-left text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+        >
+          Logout
+        </button>
       </nav>
     </aside>
   );
