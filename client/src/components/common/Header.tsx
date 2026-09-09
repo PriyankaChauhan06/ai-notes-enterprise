@@ -1,8 +1,11 @@
 import { useLocation } from "react-router-dom";
 import AInoteLogo from "../../assets/AInote-logo.svg";
+import { getStoredUser } from "../../utils/auth-storage";
 
 function Header() {
   const location = useLocation();
+  const { name }: any = getStoredUser() || { name: "User" };
+
   let currentPage = location.pathname.split("/").filter(Boolean).pop() ?? "";
   currentPage =
     currentPage.charAt(0).toUpperCase() + currentPage.slice(1).toLowerCase();
@@ -17,7 +20,7 @@ function Header() {
 
       <div className="flex items-center">
         <div className="flex h-10 w-10 mt-2 mr-2 items-center justify-center rounded-full bg-gray-200 font-semibold">
-          P
+          {name.charAt(0).toUpperCase()}
         </div>
         <img src={AInoteLogo} alt="NoteMind" className="h-14 w-auto" />
       </div>

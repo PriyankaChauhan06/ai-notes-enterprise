@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button, Input } from "../components/common";
 import loginBg from "../assets/background.png";
 import AInoteLogo from "../assets/AInote-logo.svg";
+import { useAuth } from "../contexts/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
@@ -12,18 +13,19 @@ function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const { login, isLoading } = useAuth();
 
-    if (!email.trim() || !password.trim()) {
-      alert("Please enter email and password.");
-      return;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      await login(email, password);
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(error);
     }
-
-    // Temporary frontend flow.
-    // Real authentication will be connected to the backend later.
-    navigate("/dashboard");
-  }
+  };
 
   return (
     <div
@@ -95,8 +97,8 @@ function Login() {
               </button>
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
 
