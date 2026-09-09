@@ -7,7 +7,7 @@ import {
   updateNoteController,
   deleteNoteController,
 } from "../controllers/note.controller";
-
+import { authenticate } from "../middlewares/auth.middleware";
 import { validateBody } from "../middlewares/validation.middleware";
 import {
   createNoteSchema,
@@ -16,6 +16,8 @@ import {
 import { asyncHandler } from "../utils/async-handler";
 
 const router = Router();
+
+router.use(authenticate);
 
 router.post(
   "/create",

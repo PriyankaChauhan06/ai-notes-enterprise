@@ -1,5 +1,5 @@
 import { isValidObjectId } from "mongoose";
-import { AppError } from "./AppError";
+import { AppError } from "./app-error";
 
 export function getParamId(id: string | string[]): any {
   if (typeof id !== "string") {
