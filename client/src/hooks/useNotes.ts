@@ -5,7 +5,7 @@ import {
   getNotes,
   updateNote as updateNoteApi,
 } from "../services/note.service";
-
+import { useAuth } from "../contexts/AuthContext";
 import type { Note } from "../types/note";
 
 interface CreateNoteData {
@@ -20,12 +20,13 @@ function useNotes() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { isAuthenticated } = useAuth();
+
   const loadNotes = useCallback(async () => {
     try {
       setIsLoading(true);
 
       const data = await getNotes();
-
       setNotes(data);
     } catch (error) {
       console.error("Failed to load notes:", error);
@@ -35,8 +36,9 @@ function useNotes() {
   }, []);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     loadNotes();
-  }, [loadNotes]);
+  }, [isAuthenticated, loadNotes]);
 
   const addNote = useCallback(async (data: CreateNoteData) => {
     const newNote = await createNoteApi(data);

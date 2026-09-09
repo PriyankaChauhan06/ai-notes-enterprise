@@ -1,48 +1,47 @@
 import Note from "../models/Note";
+import { AppError } from "../utils/app-error";
 
 interface CreateNoteData {
   title: string;
   description: string;
   category: string;
   tags?: string[];
+  isFavorite?: boolean;
   source?: "manual" | "ai";
 }
 
-export async function createNote(data: CreateNoteData) {
-  return await Note.create({
-    title: data.title,
-    description: data.description,
-    category: data.category,
-    tags: data.tags ?? [],
-    source: data.source ?? "manual",
-  });
+export async function createNote(userId: string, data: CreateNoteData) {
+  return await Note.create({ ...data, userId });
 }
 
-export async function getNotes() {
-  return await Note.find().sort({ createdAt: -1 });
+export async function getNotes(userId: string) {
+  return await Note.find({ userId }).sort({ createdAt: -1 });
 }
 
-export async function getNoteById(id: string) {
-  return await Note.findById(id);
+export async function getNoteById(userId: string, noteId: string) {
+  const note = await Note.findOne({ _id: noteId, userId });
+  if (!note) throw new AppError("Note not found", 404);
+
+  return note;
 }
 
 export async function updateNote(
-  id: string,
-  data: Partial<{
-    title: string;
-    description: string;
-    category: string;
-    tags: string[];
-    isFavorite: boolean;
-    source: "manual" | "ai";
-  }>,
+  userId: string,
+  noteId: string,
+  data: Partial<CreateNoteData>,
 ) {
-  return await Note.findByIdAndUpdate(id, data, {
+  const note = await Note.findOneAndUpdate({ _id: noteId, userId }, data, {
     new: true,
     runValidators: true,
   });
+  if (!note) throw new AppError("Note not found", 404);
+
+  return note;
 }
 
-export async function deleteNote(id: string) {
-  return await Note.findByIdAndDelete(id);
+export async function deleteNote(userId: string, noteId: string) {
+  const note = await Note.findOneAndDelete({ _id: noteId, userId });
+  if (!note) throw new AppError("Note not found", 404);
+
+  return note;
 }
