@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 import { Button, Input } from "../components/common";
 import loginBg from "../assets/background.png";
 import AInoteLogo from "../assets/AInote-logo.svg";
+import { getApiErrorMessage } from "../utils/api-error";
+import { registerUser } from "../services/auth.service";
 
 function Register() {
   const navigate = useNavigate();
@@ -16,8 +17,13 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    setError("");
 
     if (
       !name.trim() ||
@@ -34,9 +40,20 @@ function Register() {
       return;
     }
 
-    // Temporary frontend flow.
-    // Real registration API will be added later.
-    navigate("/");
+    setIsLoading(true);
+
+    try {
+      await registerUser({ name, email, password });
+
+      navigate("/", {
+        replace: true,
+        state: { message: "Account created successfully. Please log in." },
+      });
+    } catch (error) {
+      setError(getApiErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -130,8 +147,8 @@ function Register() {
               </button>
             </div>
 
-            <Button type="submit" className="w-full">
-              Create Account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Create account"}
             </Button>
           </form>
 

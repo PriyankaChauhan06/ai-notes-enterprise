@@ -4,6 +4,10 @@ import { useAuth } from "../../contexts/AuthContext";
 function Sidebar() {
   const { logout } = useAuth();
 
+  const handleLogout = async () => {
+    await logout();
+  };
+
   const navItems = [
     {
       label: "Dashboard",
@@ -44,7 +48,7 @@ function Sidebar() {
 
         <button
           type="button"
-          onClick={logout}
+          onClick={handleLogout}
           className="mt-2 block w-full rounded-lg px-4 py-3 text-left text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
         >
           Logout

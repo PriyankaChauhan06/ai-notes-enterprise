@@ -10,3 +10,7 @@ export const loginSchema = z.object({
   email: z.string().trim().email("Invalid email"),
   password: z.string().min(1, "Password is required"),
 });
+
+export const googleLoginSchema = z.object({
+  credential: z.string().min(1, "Google credential is required"),
+});
