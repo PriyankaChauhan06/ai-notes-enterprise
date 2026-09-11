@@ -36,9 +36,12 @@ function useNotes() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      setNotes([]);
+      return;
+    }
     loadNotes();
-  }, [isAuthenticated, loadNotes]);
+  }, [isAuthenticated]);
 
   const addNote = useCallback(async (data: CreateNoteData) => {
     const newNote = await createNoteApi(data);
