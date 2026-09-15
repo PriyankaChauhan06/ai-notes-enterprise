@@ -1,146 +1,281 @@
 import { useState } from "react";
 import { Button, Card, Textarea, Input } from "../components/common/index";
 import { useNotesContext } from "../contexts/NotesContext";
+import { generateAI } from "../services/ai.service";
+import { getApiErrorMessage } from "../utils/api-error";
 
 interface GeneratedNote {
   title: string;
   description: string;
-  category: any;
+  category: string;
   tags: string[];
 }
 
 function AIAssistant() {
   const [prompt, setPrompt] = useState("");
+  const [response, setResponse] = useState("");
   const [generatedNote, setGeneratedNote] = useState<GeneratedNote | null>(
     null,
   );
+
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+
   const { addNote } = useNotesContext();
 
-  function handleGenerate() {
+  async function handleGenerate() {
     if (!prompt.trim()) {
-      alert("Please enter a prompt");
+      setError("Please enter a prompt.");
       return;
     }
 
+    const currentPrompt = prompt.trim();
+
+    setError("");
+    setResponse("");
+    setGeneratedNote(null);
     setIsGenerating(true);
 
-    // Temporary mock AI response.
-    // Later this will be replaced by our backend API.
-    setTimeout(() => {
-      setGeneratedNote({
-        title: "",
-        description: "",
-        category: "React",
-        tags: ["React", "Hooks", "Interview"],
-      });
+    try {
+      const result = await generateAI(currentPrompt);
 
+      setResponse(result.response);
+      setGeneratedNote(result.note);
+
+      // Clear prompt after successful response
+      setPrompt("");
+    } catch (error) {
+      setError(getApiErrorMessage(error));
+    } finally {
       setIsGenerating(false);
-    }, 1000);
+    }
   }
 
-  function handleSaveNote() {
+  async function handleSaveNote() {
     if (!generatedNote) {
       return;
     }
 
-    addNote({
-      title: generatedNote.title,
-      description: generatedNote.description,
-      category: generatedNote.category,
-      tags: generatedNote.tags,
-      source: "ai",
-    });
+    if (!generatedNote.title.trim() || !generatedNote.description.trim()) {
+      setError("Title and description are required.");
+      return;
+    }
 
-    setGeneratedNote(null);
-    setPrompt("");
+    setError("");
+    setIsSaving(true);
 
-    alert("Note saved successfully!");
+    try {
+      await addNote({
+        title: generatedNote.title.trim(),
+        description: generatedNote.description.trim(),
+        category: generatedNote.category.trim(),
+        tags: generatedNote.tags,
+        source: "ai",
+      });
+
+      setGeneratedNote(null);
+      setResponse("");
+    } catch (error) {
+      setError(getApiErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function handleRegenerate() {
+    /*
+      Since prompt is cleared after successful generation,
+      we don't want Regenerate to silently send an empty prompt.
+    */
+    setError("Enter a new prompt to generate another response.");
+  }
+
+  async function handleCopy() {
+    if (!response) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(response);
+    } catch {
+      setError("Unable to copy response.");
+    }
   }
 
   return (
-    <div>
-      <div className="mb-8">
+    <div className="flex h-full min-h-0 flex-col">
+      {/* Page Header */}
+      <div className="mb-6 shrink-0">
         <h1 className="text-3xl font-bold text-gray-900">AI Assistant</h1>
 
         <p className="mt-2 text-gray-500">
-          Generate structured notes from a simple prompt.
+          Ask questions, generate knowledge, and save useful responses as notes.
         </p>
       </div>
 
-      <Card>
-        <div className="space-y-6">
-          <Textarea
-            label="What do you want to create?"
-            placeholder="Example: Create interview notes about React hooks..."
-            rows={5}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-          />
-
-          <Button
-            type="button"
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="w-full sm:w-auto"
-          >
-            {isGenerating ? "Generating..." : "Generate Note"}
-          </Button>
+      {/* Error }
+      {error && (
+        <div className="mb-6 shrink-0 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
         </div>
-      </Card>
+      ) */}
 
-      {generatedNote && (
-        <Card className="mt-6">
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Generated Note
-            </h2>
+      {/* Scrollable Result Area */}
+      <div className="flex items-center overflow-y-auto pr-1 h-[64vh]">
+        {/* AI Response */}
+        {response && (
+          <Card className="overflow-y-auto h-full mr-4">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  AI Response
+                </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Review the generated content before saving it.
-            </p>
-          </div>
-          <div className="space-y-5">
-            <Input
-              label="Title"
-              value={generatedNote.title}
-              onChange={(e) =>
-                setGeneratedNote({
-                  ...generatedNote,
-                  title: e.target.value,
-                })
-              }
-            />
+                <p className="mt-1 text-sm text-gray-500">
+                  Generated by the AI assistant.
+                </p>
+              </div>
 
-            <Textarea
-              label="Description"
-              rows={8}
-              value={generatedNote.description}
-              onChange={(e) =>
-                setGeneratedNote({
-                  ...generatedNote,
-                  description: e.target.value,
-                })
-              }
-            />
-
-            <div className="flex flex-wrap gap-3">
-              <Button type="button" onClick={handleSaveNote}>
-                Save Note
-              </Button>
-
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleGenerate}
-                disabled={isGenerating}
-              >
-                Regenerate
+              <Button type="button" variant="secondary" onClick={handleCopy}>
+                Copy
               </Button>
             </div>
-          </div>
-        </Card>
-      )}
+
+            <div className="whitespace-pre-wrap text-sm leading-7 text-gray-700">
+              {response}
+            </div>
+          </Card>
+        )}
+
+        {/* Generated Note */}
+        {generatedNote && (
+          <Card className="overflow-y-auto h-full">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Generated Note
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Review and edit the note before saving it to your knowledge
+                base.
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              <Input
+                label="Title"
+                value={generatedNote.title}
+                disabled={isSaving}
+                onChange={(e) =>
+                  setGeneratedNote({
+                    ...generatedNote,
+                    title: e.target.value,
+                  })
+                }
+              />
+
+              <Textarea
+                label="Description"
+                rows={8}
+                value={generatedNote.description}
+                disabled={isSaving}
+                onChange={(e) =>
+                  setGeneratedNote({
+                    ...generatedNote,
+                    description: e.target.value,
+                  })
+                }
+              />
+
+              <Input
+                label="Category"
+                value={generatedNote.category}
+                disabled={isSaving}
+                onChange={(e) =>
+                  setGeneratedNote({
+                    ...generatedNote,
+                    category: e.target.value,
+                  })
+                }
+              />
+
+              <Input
+                label="Tags"
+                value={generatedNote.tags.join(", ")}
+                disabled={isSaving}
+                onChange={(e) =>
+                  setGeneratedNote({
+                    ...generatedNote,
+                    tags: e.target.value
+                      .split(",")
+                      .map((tag) => tag.trim())
+                      .filter(Boolean),
+                  })
+                }
+              />
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Button
+                  type="button"
+                  onClick={handleSaveNote}
+                  disabled={
+                    isSaving ||
+                    !generatedNote.title.trim() ||
+                    !generatedNote.description.trim()
+                  }
+                >
+                  {isSaving ? "Saving..." : "Save Note"}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleRegenerate}
+                  disabled={isGenerating || isSaving}
+                >
+                  Regenerate
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+      </div>
+
+      {/* Bottom Prompt Composer */}
+      <div className="flex items-end gap-3 mt-6 p-2 border border-solid border-gray-300">
+        <div className="flex-1">
+          <Textarea
+            placeholder="Ask anything..."
+            rows={1}
+            value={prompt}
+            disabled={isGenerating}
+            onChange={(e) => {
+              setPrompt(e.target.value);
+              setError("");
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+
+                if (!isGenerating && prompt.trim()) {
+                  handleGenerate();
+                }
+              }
+            }}
+            className="resize-none border-0 px-2 py-2 shadow-none focus:ring-0"
+          />
+        </div>
+
+        <Button
+          type="button"
+          onClick={handleGenerate}
+          disabled={isGenerating || !prompt.trim()}
+          className="shrink-0"
+        >
+          {isGenerating ? "..." : "↑"}
+        </Button>
+      </div>
     </div>
   );
 }
