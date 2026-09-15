@@ -29,7 +29,7 @@ function Sidebar() {
         <h1 className="text-xl font-bold">AI Notes Enterprise</h1>
       </div>
 
-      <nav className="p-4 mt-5 border-t border-gray-200">
+      <nav className="p-4 mt-7 border-t border-gray-200">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -49,7 +49,7 @@ function Sidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-2 block w-full rounded-lg px-4 py-3 text-left text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+          className="my-7 block w-auto rounded-lg px-4 py-3 text-left text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition absolute bottom-0"
         >
           Logout
         </button>

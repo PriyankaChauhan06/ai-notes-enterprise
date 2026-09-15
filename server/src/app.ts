@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes";
 import noteRoutes from "./routes/note.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import passport from "./config/passport";
+import aiRoutes from "./routes/ai.routes";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
 
+app.use("/api/ai", aiRoutes);
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
