@@ -3,6 +3,7 @@ import {
   createNote,
   getNotes,
   getNoteById,
+  getAllCategory,
   updateNote,
   deleteNote,
 } from "../services/note.service";
@@ -24,13 +25,18 @@ export async function getNotesController(req: Request, res: Response) {
 // Get Note by ID
 export async function getNoteByIdController(req: Request, res: Response) {
   const id = getParamId(req.params.id);
-
   if (!isValidNoteId(id)) throw new AppError("Invalid note id", 400);
 
   const note = await getNoteById(req.userId, id);
   if (!note) throw new AppError("Note not found", 404);
 
   res.status(200).json({ success: true, data: note });
+}
+
+// Get All Category
+export async function getAllCategoryController(req: Request, res: Response) {
+  const categories = await getAllCategory(req.userId);
+  res.status(200).json({ success: true, data: categories });
 }
 
 // Update Note

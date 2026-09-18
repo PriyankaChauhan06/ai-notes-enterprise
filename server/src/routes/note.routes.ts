@@ -4,6 +4,7 @@ import {
   createNoteController,
   getNotesController,
   getNoteByIdController,
+  getAllCategoryController,
   updateNoteController,
   deleteNoteController,
 } from "../controllers/note.controller";
@@ -28,6 +29,8 @@ router.post(
 router.get("/fetchAll", asyncHandler(getNotesController));
 
 router.get("/fetch/:id", asyncHandler(getNoteByIdController));
+
+router.get("/fetchAll/category", asyncHandler(getAllCategoryController));
 
 router.patch(
   "/update/:id",

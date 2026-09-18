@@ -7,6 +7,7 @@ import noteRoutes from "./routes/note.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import passport from "./config/passport";
 import aiRoutes from "./routes/ai.routes";
+import searchRoutes from "./routes/search.routes";
 
 const app = express();
 
@@ -37,6 +38,8 @@ app.use((req, res, next) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/note", noteRoutes);
+app.use("/api/search", searchRoutes);
+
 app.use(errorHandler);
 
 export default app;

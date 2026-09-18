@@ -3,21 +3,15 @@ import {
   createNote as createNoteApi,
   deleteNote as deleteNoteApi,
   getNotes,
+  getAllCategory,
   updateNote as updateNoteApi,
 } from "../services/note.service";
 import { useAuth } from "../contexts/AuthContext";
-import type { Note } from "../types/note";
-
-interface CreateNoteData {
-  title: Note["title"];
-  description: Note["description"];
-  category: Note["category"];
-  tags: Note["tags"];
-  source: Note["source"];
-}
+import type { CreateNoteData, Note } from "../types/note";
 
 function useNotes() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [categories, setCategory] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const { isAuthenticated } = useAuth();
@@ -26,8 +20,11 @@ function useNotes() {
     try {
       setIsLoading(true);
 
-      const data = await getNotes();
-      setNotes(data);
+      const note = await getNotes();
+      setNotes(note);
+
+      const category = await getAllCategory();
+      setCategory(category);
     } catch (error) {
       console.error("Failed to load notes:", error);
     } finally {
@@ -86,6 +83,7 @@ function useNotes() {
 
   return {
     notes,
+    categories,
     isLoading,
     addNote,
     updateNote,

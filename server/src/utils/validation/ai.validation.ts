@@ -17,3 +17,19 @@ export const aiResultSchema = z.object({
     tags: z.array(z.string()),
   }),
 });
+
+export const semanticSearchSchema = z.object({
+  query: z
+    .string()
+    .trim()
+    .min(1, "Query is required")
+    .max(1000, "Query is too long"),
+});
+
+export const askRAGSchema = z.object({
+  question: z
+    .string()
+    .trim()
+    .min(1, "Question is required")
+    .max(2000, "Question is too long"),
+});

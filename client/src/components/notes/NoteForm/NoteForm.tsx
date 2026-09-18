@@ -1,24 +1,11 @@
 import { useEffect, useState } from "react";
 import type { NoteFormProps } from "../../../types/note-form-props";
-import {
-  Input,
-  Button,
-  Textarea,
-} from "../../../components/common/index";
-
-const CATEGORIES = [
-  "React",
-  "JavaScript",
-  "Backend",
-  "Database",
-  "DevOps",
-  "Other",
-];
+import { Input, Button, Textarea } from "../../../components/common/index";
 
 function NoteForm({ onAddNote, editingNote }: NoteFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Other");
+  const [category, setCategory] = useState("");
   const [tagsInput, setTagsInput] = useState("");
 
   useEffect(() => {
@@ -30,7 +17,7 @@ function NoteForm({ onAddNote, editingNote }: NoteFormProps) {
     } else {
       setTitle("");
       setDescription("");
-      setCategory("Other");
+      setCategory("");
       setTagsInput("");
     }
   }, [editingNote]);
@@ -50,7 +37,7 @@ function NoteForm({ onAddNote, editingNote }: NoteFormProps) {
 
     setTitle("");
     setDescription("");
-    setCategory("Other");
+    setCategory("");
     setTagsInput("");
   }
 
@@ -71,24 +58,12 @@ function NoteForm({ onAddNote, editingNote }: NoteFormProps) {
         onChange={(e) => setDescription(e.target.value)}
       />
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor="category" className="font-medium text-gray-700">
-          Category
-        </label>
-
-        <select
-          id="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-        >
-          {CATEGORIES.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Input
+        label="category"
+        placeholder="react, JavaScript, DevOps, Database, Security, Auth"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+      />
 
       <Input
         label="Tags"
