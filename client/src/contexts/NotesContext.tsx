@@ -6,6 +6,8 @@ import type { Note } from "../types/note";
 interface NotesContextValue {
   notes: Note[];
 
+  categories: string[];
+
   addNote: (data: {
     title: Note["title"];
     description: Note["description"];

@@ -10,7 +10,19 @@ export interface AIResult {
   note: AINote;
 }
 
-export interface GenerateAIResponse {
+export interface GenerateAIAndRAGResponse {
   success: boolean;
   data: AIResult;
+}
+
+export interface AISource {
+  noteId: string;
+  title: string;
+  category: string;
+  score: number;
+}
+
+export interface RAGResult {
+  answer: string;
+  sources: AISource[];
 }

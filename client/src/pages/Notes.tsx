@@ -4,17 +4,16 @@ import type { Note } from "../types/note";
 import NoteForm from "../components/notes/NoteForm/NoteForm";
 import { useNotesContext } from "../contexts/NotesContext";
 
-const categories = ["all", "React", "Backend", "JavaScript", "DevOps"];
-
 function Notes() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
-  const { notes, addNote, updateNote, deleteNote, toggleFavorite } =
+  const { notes, categories, addNote, updateNote, deleteNote, toggleFavorite } =
     useNotesContext();
+
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
   const handleEditNote = (note: Note) => {
     setEditingNote(note);
@@ -76,72 +75,65 @@ function Notes() {
   return (
     <>
       <div>
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Notes</h1>
+        <div className="flex justify-between items-center mb-6">
+          <Card className="w-[-webkit-fill-available] mr-6 p-2">
+            <div className="flex justify-between items-center">
+              <div className="flex w-full mr-4">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="rounded-xl border border-gray-300 bg-white px-4 py-2 mr-4 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 w-40"
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
 
-            <p className="mt-2 text-gray-500">
-              Create, organize and manage your notes.
-            </p>
-          </div>
+                <Input
+                  placeholder="Search notes..."
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-lg"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-700">
+                  Favorites
+                </span>
+
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={showFavoritesOnly}
+                  onClick={() => setShowFavoritesOnly((current) => !current)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    showFavoritesOnly ? "bg-blue-600" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
+                      showFavoritesOnly ? "translate-x-5" : "translate-x-0.5"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </Card>
 
           <Button
             onClick={() => {
               setEditingNote(null);
               setIsNoteDialogOpen(true);
             }}
+            className="min-w-max"
           >
             + New Note
           </Button>
         </div>
-
-        <Card className="mb-6">
-          <div className="flex justify-between items-center">
-            <div className="flex w-full mr-4">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="rounded-xl border border-gray-300 bg-white px-4 py-2 mr-4 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-
-              <Input
-                placeholder="Search notes..."
-                type="search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-lg"
-              />
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">
-                Favorites
-              </span>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={showFavoritesOnly}
-                onClick={() => setShowFavoritesOnly((current) => !current)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  showFavoritesOnly ? "bg-blue-600" : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
-                    showFavoritesOnly ? "translate-x-5" : "translate-x-0.5"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-        </Card>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 max-h-[60vh] overflow-x-hidden overflow-y-auto custom-scrollbar">
           {filteredNotes.map((note) => (
