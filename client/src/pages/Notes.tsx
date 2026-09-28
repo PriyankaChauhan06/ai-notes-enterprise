@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Dialog, Input } from "../components/common/index";
 import type { Note } from "../types/note";
 import NoteForm from "../components/notes/NoteForm/NoteForm";
@@ -72,10 +72,17 @@ function Notes() {
     });
   }, [notes, searchTerm, showFavoritesOnly, selectedCategory]);
 
+  useEffect(() => {
+    if (categories.length > 0 && !categories.includes(selectedCategory)) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
+
   return (
     <>
-      <div>
-        <div className="flex justify-between items-center mb-6">
+      <div className="flex h-full min-h-0 flex-col">
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between mb-6">
           <Card className="w-[-webkit-fill-available] mr-6 p-2">
             <div className="flex justify-between items-center">
               <div className="flex w-full mr-4">
@@ -135,53 +142,56 @@ function Notes() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 max-h-[60vh] overflow-x-hidden overflow-y-auto custom-scrollbar">
-          {filteredNotes.map((note) => (
-            <Card key={note.id}>
-              <h3 className="text-lg font-semibold">{note.title}</h3>
+        {/* Notes */}
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+          <div className="grid grid-cols-1 gap-6 pb-6 md:grid-cols-2 xl:grid-cols-3">
+            {filteredNotes.map((note) => (
+              <Card key={note.id} className="flex flex-col h-52.5">
+                <h3 className="text-lg font-semibold">{note.title}</h3>
 
-              <p className="mt-2 line-clamp-3 text-sm text-gray-600">
-                {note.description}
-              </p>
+                <p className="mt-2 line-clamp-3 text-sm text-gray-600">
+                  {note.description}
+                </p>
 
-              <div className="mt-4 flex gap-2">
-                {/* Edit */}
-                <Button
-                  variant="secondary"
-                  onClick={() => handleEditNote(note)}
-                >
-                  Edit
-                </Button>
+                <div className="mt-auto flex gap-2">
+                  {/* Edit */}
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleEditNote(note)}
+                  >
+                    Edit
+                  </Button>
 
-                {/* Favorite */}
-                <Button
-                  variant="secondary"
-                  onClick={() => toggleFavorite(note.id)}
-                >
-                  {note.isFavorite ? "⭐ Unfavorite" : "☆ Favorite"}
-                </Button>
+                  {/* Favorite */}
+                  <Button
+                    variant="secondary"
+                    onClick={() => toggleFavorite(note.id)}
+                  >
+                    {note.isFavorite ? "⭐ Unfavorite" : "☆ Favorite"}
+                  </Button>
 
-                {/* Delete */}
-                <Button
-                  variant="danger"
-                  onClick={async () => {
-                    try {
-                      await deleteNote(note.id);
+                  {/* Delete */}
+                  <Button
+                    variant="danger"
+                    onClick={async () => {
+                      try {
+                        await deleteNote(note.id);
 
-                      if (editingNote?.id === note.id) {
-                        setEditingNote(null);
-                        setIsNoteDialogOpen(false);
+                        if (editingNote?.id === note.id) {
+                          setEditingNote(null);
+                          setIsNoteDialogOpen(false);
+                        }
+                      } catch (error) {
+                        console.error("Failed to delete note:", error);
                       }
-                    } catch (error) {
-                      console.error("Failed to delete note:", error);
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
-              </div>
-            </Card>
-          ))}
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
 
         <Dialog

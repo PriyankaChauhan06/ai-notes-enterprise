@@ -1,5 +1,52 @@
 import { Schema, model } from "mongoose";
 
+const messageSchema = new Schema(
+  {
+    role: {
+      type: String,
+      enum: ["user", "assistant"],
+      required: true,
+    },
+
+    content: {
+      type: String,
+      required: true,
+    },
+
+    noteId: {
+      type: Schema.Types.ObjectId,
+      ref: "Note",
+      required: false,
+    },
+  },
+  { _id: false },
+);
+
+// Only exists when user needs to confirm an action
+const pendingActionSchema = new Schema(
+  {
+    actionType: {
+      type: String,
+      enum: ["delete_note", "update_note"],
+      required: true,
+    },
+
+    noteId: {
+      type: Schema.Types.ObjectId,
+      ref: "Note",
+      required: true,
+    },
+
+    updates: {
+      title: String,
+      description: String,
+      category: String,
+      tags: [String],
+    },
+  },
+  { _id: false },
+);
+
 const aiConversationSchema = new Schema(
   {
     userId: {
@@ -9,40 +56,22 @@ const aiConversationSchema = new Schema(
       index: true,
     },
 
-    question: {
-      type: String,
-      required: true,
-      trim: true,
+    messages: {
+      type: [messageSchema],
+      default: [],
     },
 
-    answer: {
+    summary: {
       type: String,
-      required: true,
+      default: "",
     },
 
-    sources: [
-      {
-        noteId: {
-          type: Schema.Types.ObjectId,
-          ref: "Note",
-          required: true,
-        },
-
-        title: {
-          type: String,
-          required: true,
-        },
-
-        score: {
-          type: Number,
-          required: true,
-        },
-      },
-    ],
+    pendingAction: {
+      type: pendingActionSchema,
+      default: undefined,
+    },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
 const AIConversation = model("AIConversation", aiConversationSchema);
