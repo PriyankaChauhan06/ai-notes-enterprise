@@ -44,6 +44,26 @@ function useNotes() {
     const newNote = await createNoteApi(data);
 
     setNotes((currentNotes) => [newNote, ...currentNotes]);
+
+    setCategory((currentCategories) => {
+      if (currentCategories.includes(newNote.category)) {
+        return currentCategories;
+      }
+
+      return [...currentCategories, newNote.category];
+    });
+  }, []);
+
+  const addNoteToState = useCallback((note: Note) => {
+    setNotes((currentNotes) => [note, ...currentNotes]);
+
+    setCategory((currentCategories) => {
+      if (currentCategories.includes(note.category)) {
+        return currentCategories;
+      }
+
+      return [...currentCategories, note.category];
+    });
   }, []);
 
   const updateNote = useCallback(async (updatedNote: Note) => {
@@ -61,10 +81,32 @@ function useNotes() {
     );
   }, []);
 
+  const updateNoteInState = useCallback((updatedNote: Note) => {
+    setNotes((currentNotes) =>
+      currentNotes.map((note) =>
+        note.id === updatedNote.id ? updatedNote : note,
+      ),
+    );
+
+    setCategory((currentCategories) => {
+      if (currentCategories.includes(updatedNote.category)) {
+        return currentCategories;
+      }
+
+      return [...currentCategories, updatedNote.category];
+    });
+  }, []);
+
   const deleteNote = useCallback(async (id: Note["id"]) => {
     await deleteNoteApi(id);
 
     setNotes((currentNotes) => currentNotes.filter((note) => note.id !== id));
+  }, []);
+
+  const removeNoteFromState = useCallback((noteId: Note["id"]) => {
+    setNotes((currentNotes) =>
+      currentNotes.filter((note) => note.id !== noteId),
+    );
   }, []);
 
   const toggleFavorite = useCallback(
@@ -86,8 +128,11 @@ function useNotes() {
     categories,
     isLoading,
     addNote,
+    addNoteToState,
     updateNote,
+    updateNoteInState,
     deleteNote,
+    removeNoteFromState,
     toggleFavorite,
     loadNotes,
   };

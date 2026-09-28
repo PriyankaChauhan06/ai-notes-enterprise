@@ -2,8 +2,6 @@ import { Types } from "mongoose";
 import NoteChunk from "../models/NoteChunk";
 import { generateEmbedding } from "./embedding.service";
 
-const RAGMinScore: any = process.env.RAG_MIN_SCORE ?? "0.75";
-
 interface SemanticSearchData {
   userId: string;
   query: string;
@@ -34,7 +32,7 @@ export async function semanticSearch({ userId, query }: SemanticSearchData) {
         score: { $meta: "vectorSearchScore" },
       },
     },
-    { $match: { score: { $gte: RAGMinScore } } },
+    { $match: { score: { $gte: 0.7 } } }, // 0.75
     { $limit: 5 },
   ]);
 

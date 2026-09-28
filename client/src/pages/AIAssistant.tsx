@@ -1,9 +1,20 @@
-import { useState } from "react";
-import { Button, Card, Textarea, Input } from "../components/common/index";
+import { useEffect, useState } from "react";
 import { useNotesContext } from "../contexts/NotesContext";
-import { askAI, generateAI } from "../services/ai.service";
+import type {
+  AIConversation,
+  AINote,
+  AISource,
+  AskAIResponse,
+} from "../types/ai-assistant.props";
 import { getApiErrorMessage } from "../utils/api-error";
-import type { AINote, AISource } from "../types/ai-assistant.props";
+import { askAI, generateAI, getAIHistory } from "../services/ai.service";
+import {
+  Button,
+  Card,
+  Textarea,
+  Input,
+  Dialog,
+} from "../components/common/index";
 
 type AIMode = "ask" | "generate";
 
@@ -14,10 +25,41 @@ function AIAssistant() {
   const [generatedNote, setGeneratedNote] = useState<AINote | null>(null);
   const [sources, setSources] = useState<AISource[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [history, setHistory] = useState<AIConversation[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [pendingAction, setPendingAction] = useState<any>(null);
   const [error, setError] = useState("");
 
-  const { addNote } = useNotesContext();
+  const { addNote, addNoteToState, updateNoteInState, removeNoteFromState } =
+    useNotesContext();
+
+  useEffect(() => {
+    async function loadHistory() {
+      setIsHistoryLoading(true);
+      try {
+        const result = await getAIHistory();
+        setHistory(result);
+      } catch (error) {
+        console.error("Failed to load AI history:", error);
+      } finally {
+        setIsHistoryLoading(false);
+      }
+    }
+
+    loadHistory();
+  }, []);
+
+  function getLastUserMessage(conversation: AIConversation) {
+    if (!Array.isArray(conversation.messages)) {
+      return undefined;
+    }
+
+    return [...conversation.messages]
+      .reverse()
+      .find((message) => message.role === "user");
+  }
 
   async function handleGenerate() {
     if (!prompt.trim()) {
@@ -35,9 +77,89 @@ function AIAssistant() {
 
     try {
       if (mode === "ask") {
-        const result: any = await askAI(currentPrompt);
+        const result: any = await askAI({
+          question: currentPrompt,
+          conversationId,
+        });
+
+        // If AI created a note, immediately add it to NotesContext
+        if (result.createdNote) {
+          addNoteToState(result.createdNote);
+        }
+
+        if (result.deletedNote) {
+          removeNoteFromState(result.deletedNote.id);
+        }
+
+        if (result.updatedNote) {
+          updateNoteInState(result.updatedNote);
+        }
+
+        if (result.conversationDeleted) {
+          setHistory((currentHistory) =>
+            currentHistory.filter(
+              (conversation) => conversation._id !== result.conversationId,
+            ),
+          );
+
+          setConversationId(null);
+        } else {
+          setConversationId(result.conversationId);
+        }
+
+        // setConversationId(result.conversationId);
         setResponse(result.answer);
-        setSources(result.sources);
+        setPendingAction(result.pendingAction ?? null);
+
+        // Update history immediately without refreshing
+        setHistory((currentHistory) => {
+          const existingConversation = currentHistory.find(
+            (conversation) => conversation._id === result.conversationId,
+          );
+
+          // Existing conversation
+          if (existingConversation) {
+            return currentHistory.map((conversation) =>
+              conversation._id === result.conversationId
+                ? {
+                    ...conversation,
+                    messages: [
+                      ...conversation.messages,
+                      {
+                        role: "user",
+                        content: currentPrompt,
+                      },
+                      {
+                        role: "assistant",
+                        content: result.answer,
+                      },
+                    ],
+                    updatedAt: new Date().toISOString(),
+                  }
+                : conversation,
+            );
+          }
+
+          // New conversation
+          return [
+            {
+              _id: result.conversationId,
+              messages: [
+                {
+                  role: "user",
+                  content: currentPrompt,
+                },
+                {
+                  role: "assistant",
+                  content: result.answer,
+                },
+              ],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            ...currentHistory,
+          ];
+        });
       } else {
         const result = await generateAI(currentPrompt);
         setResponse(result.response);
@@ -99,6 +221,105 @@ function AIAssistant() {
     }
   }
 
+  async function handleConfirmAction() {
+    if (!conversationId || !pendingAction) return;
+
+    setError("");
+    setIsGenerating(true);
+
+    try {
+      const result: any = await askAI({
+        question: "Yes",
+        conversationId,
+      });
+
+      if (result.updatedNote) {
+        updateNoteInState(result.updatedNote);
+      }
+
+      if (result.deletedNote) {
+        removeNoteFromState(result.deletedNote.id);
+      }
+
+      setResponse(result.answer);
+      setPendingAction(null);
+
+      if (result.conversationDeleted) {
+        setHistory((currentHistory) =>
+          currentHistory.filter(
+            (conversation) => conversation._id !== result.conversationId,
+          ),
+        );
+
+        setConversationId(null);
+      } else {
+        setConversationId(result.conversationId);
+
+        setHistory((currentHistory) =>
+          currentHistory.map((conversation) =>
+            conversation._id === result.conversationId
+              ? {
+                  ...conversation,
+                  messages: [
+                    ...conversation.messages,
+                    {
+                      role: "assistant",
+                      content: result.answer,
+                    },
+                  ],
+                  updatedAt: new Date().toISOString(),
+                }
+              : conversation,
+          ),
+        );
+      }
+    } catch (error) {
+      setError(getApiErrorMessage(error));
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function handleCancelAction() {
+    if (!conversationId || !pendingAction) return;
+
+    setError("");
+    setIsGenerating(true);
+
+    try {
+      const result: any = await askAI({
+        question: "No",
+        conversationId,
+      });
+
+      setResponse(result.answer);
+      setPendingAction(null);
+      setConversationId(result.conversationId);
+
+      setHistory((currentHistory) =>
+        currentHistory.map((conversation) =>
+          conversation._id === result.conversationId
+            ? {
+                ...conversation,
+                messages: [
+                  ...conversation.messages,
+                  {
+                    role: "assistant",
+                    content: result.answer,
+                  },
+                ],
+                updatedAt: new Date().toISOString(),
+              }
+            : conversation,
+        ),
+      );
+    } catch (error) {
+      setError(getApiErrorMessage(error));
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
   function handleModeChange(nextMode: AIMode) {
     if (nextMode === mode) return;
 
@@ -107,6 +328,7 @@ function AIAssistant() {
     setResponse("");
     setGeneratedNote(null);
     setSources([]);
+    setPendingAction(null);
     setError("");
   }
 
@@ -187,10 +409,66 @@ function AIAssistant() {
       </div>
 
       {/* Scrollable Result Area */}
-      <div className="flex items-center overflow-y-auto pr-1 h-[74vh]">
+      <div className="flex items-start scrollbar-none overflow-y-auto pr-1">
+        {/* Previous history */}
+        {history.length > 0 && (
+          <Card className="w-48 p-3">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3 ml-1">
+              History
+            </h2>
+
+            {isHistoryLoading ? (
+              <p className="text-sm text-gray-500">Loading history...</p>
+            ) : (
+              <div className="space-y-2">
+                {history.map((conversation) => {
+                  const lastUserMessage = getLastUserMessage(conversation);
+
+                  if (!lastUserMessage) return null;
+
+                  return (
+                    <button
+                      key={conversation._id}
+                      type="button"
+                      onClick={() => {
+                        const messages = conversation.messages;
+
+                        const lastUser = [...messages]
+                          .reverse()
+                          .find((message) => message.role === "user");
+
+                        const lastAssistant = [...messages]
+                          .reverse()
+                          .find((message) => message.role === "assistant");
+
+                        setConversationId(conversation._id);
+                        setPrompt(lastUser?.content ?? "");
+                        setResponse(lastAssistant?.content ?? "");
+                        setSources([]);
+                      }}
+                      className="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 text-left transition hover:bg-gray-100"
+                    >
+                      <p
+                        className="truncate text-sm font-medium text-gray-800"
+                        title={lastUserMessage.content}
+                      >
+                        {lastUserMessage.content}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500">
+                        {new Date(conversation.updatedAt).toLocaleString()}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        )}
+
         {/* AI Response */}
         {response && (
-          <Card className="mr-4 flex h-full min-h-0 w-full flex-col">
+          <Card className="ml-4 flex h-full min-h-0 w-full flex-col">
             {/* Fixed Header */}
             <div className="mb-5 shrink-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -234,9 +512,81 @@ function AIAssistant() {
           </Card>
         )}
 
+        <Dialog
+          open={Boolean(pendingAction)}
+          title="Confirm action"
+          onClose={handleCancelAction}
+        >
+          <div className="space-y-5">
+            {/* Action description */}
+            <div>
+              <p className="text-sm text-gray-500">
+                Are you sure you want to{" "}
+                {pendingAction?.type === "delete_note"
+                  ? "delete this note?"
+                  : "update this note?"}
+              </p>
+            </div>
+
+            {/* Update details */}
+            {pendingAction?.type === "update_note" && pendingAction.updates && (
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                <p className="mb-3 text-sm font-semibold text-gray-800">
+                  Proposed changes
+                </p>
+
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="text-xs font-medium text-gray-500">Title</p>
+                    <p className="mt-1 text-gray-800">
+                      {pendingAction.updates.title}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium text-gray-500">
+                      Category
+                    </p>
+                    <p className="mt-1 text-gray-800">
+                      {pendingAction.updates.category}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium text-gray-500">Tags</p>
+                    <p className="mt-1 text-gray-800">
+                      {pendingAction.updates.tags?.join(", ") || "None"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleCancelAction}
+                disabled={isGenerating}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type="button"
+                onClick={handleConfirmAction}
+                disabled={isGenerating}
+              >
+                {isGenerating ? "Processing..." : "Confirm"}
+              </Button>
+            </div>
+          </div>
+        </Dialog>
+
         {/* Sources — only for RAG */}
-        {mode === "ask" && sources.length > 0 && (
-          <Card className="flex h-full min-h-0 w-full flex-col">
+        {mode === "ask" && sources?.length > 0 && (
+          <Card className="flex h-full min-h-0 w-full flex-col ml-4">
             {/* Fixed Header */}
             <div className="mb-5 shrink-0">
               <h2 className="text-xl font-semibold text-gray-900">Sources</h2>
@@ -270,7 +620,7 @@ function AIAssistant() {
 
         {/* Generated Note — only for Generate mode */}
         {mode === "generate" && generatedNote && (
-          <Card className="flex flex-col h-full min-h-0 w-full">
+          <Card className="flex flex-col h-full min-h-0 w-full ml-4">
             {/* Fixed Header + Actions */}
             <div className="mb-6 shrink-0">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -278,11 +628,6 @@ function AIAssistant() {
                   <h2 className="text-xl font-semibold text-gray-900">
                     Generated Note
                   </h2>
-
-                  <p className="mt-1 text-sm text-gray-500">
-                    Review and edit the generated note before saving it to your
-                    knowledge base.
-                  </p>
                 </div>
 
                 <div className="flex shrink-0 flex-wrap gap-3">

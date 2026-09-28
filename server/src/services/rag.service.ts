@@ -90,15 +90,16 @@ export async function askWithRAG({ userId, question }: AskWithRAGData) {
   }
 
   const answer = response.output_text;
+
   await AIConversation.create({
     userId,
-    question,
-    answer,
-    sources: Array.from(sourceMap.values()).map((source) => ({
-      noteId: source.noteId,
-      title: source.title,
-      score: source.score,
-    })),
+    messages: [
+      Array.from(sourceMap.values()).map((source) => ({
+        noteId: source.noteId,
+        role: "ai",
+        content: source.title,
+      })),
+    ],
   });
 
   return { answer, sources: Array.from(sourceMap.values()) };

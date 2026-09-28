@@ -16,10 +16,12 @@ interface NotesContextValue {
     source: Note["source"];
   }) => Promise<void>;
 
+  addNoteToState: (note: Note) => void;
+  updateNoteInState: (note: Note) => void;
+  removeNoteFromState: (noteId: Note["id"]) => void;
+
   updateNote: (note: Note) => Promise<void>;
-
   deleteNote: (id: Note["id"]) => Promise<void>;
-
   toggleFavorite: (id: Note["id"]) => Promise<void>;
 
   isLoading: boolean;
