@@ -20,6 +20,8 @@ function Register() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  error && console.error("Registration Error: ", error);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -63,7 +65,7 @@ function Register() {
         backgroundImage: `url(${loginBg})`,
       }}
     >
-      <div className="flex min-h-screen items-center justify-center bg-black/10 p-4 sm:p-6">
+      <div className="flex min-h-screen items-center justify-center bg-black/10 p-4 sm:p-5">
         <img
           src={AInoteLogo}
           alt="NoteMind"
@@ -71,7 +73,7 @@ function Register() {
           style={{ position: "absolute", top: "16px", right: "24px" }}
         />
 
-        <div className="w-full max-w-lg rounded-3xl bg-white/95 p-6 shadow-2xl backdrop-blur-sm sm:p-8">
+        <div className="w-full max-w-lg rounded-3xl bg-white/95 p-5 shadow-2xl backdrop-blur-sm sm:p-8">
           {/* Logo */}
           <div className="mb-7 flex justify-center">
             <img src={AInoteLogo} alt="NoteMind" className="h-20 w-auto" />

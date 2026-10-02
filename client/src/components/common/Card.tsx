@@ -9,7 +9,7 @@ function Card({ children, className = "", ...props }: CardProps) {
   return (
     <div
       className={twMerge(
-        "rounded-xl border border-gray-200 bg-white shadow-md p-6",
+        "rounded-xl border border-gray-200 bg-white shadow-md p-5",
         className,
       )}
       {...props}

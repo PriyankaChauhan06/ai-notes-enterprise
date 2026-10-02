@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { recordAgentRun } from "../../src/services/agent-run.service";
 import { runAgent } from "../../src/services/agent.service";
 import AIConversation from "../../src/models/AIConversation";
 import { openai } from "../../src/config/ai";
@@ -25,6 +26,10 @@ vi.mock("../../src/models/AIConversation", () => ({
     findOne: vi.fn(),
     create: vi.fn(),
   },
+}));
+
+vi.mock("../../src/services/agent-run.service", () => ({
+  recordAgentRun: vi.fn().mockResolvedValue(undefined),
 }));
 
 const mockedOpenAI = vi.mocked(openai.responses.create);

@@ -1,8 +1,8 @@
 import { openai } from "../config/ai";
+import { AIModel } from "../config/ai-model"; // gpt-5, gpt-5-mini, gpt-5-nano, gpt-5.6-luna, gpt-5.6-terra, gpt-5.6-sol
 import { AppError } from "../utils/app-error";
 import { aiResultSchema } from "../utils/validation/ai.validation";
 
-const AIModel: any = process.env.AI_MODEL; // gpt-5, gpt-5-mini, gpt-5-nano, gpt-5.6-luna, gpt-5.6-terra, gpt-5.6-sol
 const SYSTEM_PROMPT = `
   You are an expert knowledge assistant for an AI Notes application.
 
@@ -28,7 +28,7 @@ export async function generateAI(data: GenerateAIData) {
       model: AIModel,
       instructions: SYSTEM_PROMPT,
       input: data.prompt,
-
+      max_output_tokens: 2500,
       text: {
         format: {
           type: "json_schema",
@@ -77,6 +77,16 @@ export async function generateAI(data: GenerateAIData) {
         },
       },
     });
+
+    if (result.status !== "completed") {
+      console.error("OpenAI incomplete response:", {
+        status: result.status,
+        incompleteDetails: result.incomplete_details,
+        outputText: result.output_text,
+      });
+
+      throw new AppError("AI response was incomplete", 503);
+    }
 
     const parsed = JSON.parse(result.output_text);
     return aiResultSchema.parse(parsed);

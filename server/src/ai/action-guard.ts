@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { AppError } from "../utils/app-error";
 
 export function validateCreateIntent(question: string) {
@@ -18,5 +19,11 @@ export function validateCreateIntent(question: string) {
 
   if (!hasCreateIntent) {
     throw new AppError("Creating a note requires explicit user intent.", 400);
+  }
+}
+
+export function validateNoteId(noteId: unknown): asserts noteId is string {
+  if (typeof noteId !== "string" || !Types.ObjectId.isValid(noteId)) {
+    throw new AppError("Invalid note ID.", 400);
   }
 }

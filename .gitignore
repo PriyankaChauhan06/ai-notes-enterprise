@@ -10,6 +10,7 @@ build/
 .env
 .env.*
 **/.env
+.env.test
 
 # Logs
 logs/

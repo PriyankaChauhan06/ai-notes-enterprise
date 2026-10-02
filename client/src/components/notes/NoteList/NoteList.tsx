@@ -9,7 +9,7 @@ function NoteList({ notes, onEditNote, onDeleteNote }: NoteListProps) {
       <Card>
         <h2 className="text-purple-900 text-lg font-semibold mb-2">My Notes</h2>
 
-        <div style={{ maxHeight: "308px" }} className="overflow-y-auto">
+        <div style={{ maxHeight: "308px" }} className="scrollbar-none overflow-y-auto">
           {notes?.length ? (
             notes.map((note: Note) => (
               <NoteCard

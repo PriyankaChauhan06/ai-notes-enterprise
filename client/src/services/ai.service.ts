@@ -17,9 +17,7 @@ export async function generateAI(prompt: string) {
 export async function askAI({ question, conversationId }: AskAIRequest) {
   const payload: { question: string; conversationId?: string } = { question };
 
-  if (conversationId) {
-    payload.conversationId = conversationId;
-  }
+  if (conversationId) payload.conversationId = conversationId;
 
   const response = await api.post<AskAIResponse>("/ai/agent", payload);
   return response.data.data;
