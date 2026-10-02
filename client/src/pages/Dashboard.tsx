@@ -20,9 +20,9 @@ function Dashboard() {
   );
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       {/* Stats */}
-      <section className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 mb-4">
+      <section className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5 mb-5">
         <StatsCard
           title="Total Notes"
           value={totalNotes}
@@ -46,7 +46,7 @@ function Dashboard() {
       </section>
 
       {/* Notes */}
-      <Card>
+      <Card className="flex min-h-0 flex-1 flex-col">
         {!notes.length ? (
           <div className="py-10 text-center">
             <p className="text-gray-500">No notes yet.</p>
@@ -59,29 +59,31 @@ function Dashboard() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
-            {notes.map((note) => (
-              <Card
-                key={note.id}
-                className="flex items-center justify-between py-4 mr-4 last:mr-0 w-full"
-              >
-                <div className="min-w-0">
-                  <h3 className="truncate font-medium text-gray-900">
-                    {note.title}
-                  </h3>
+          <div className="min-h-0 flex-1 scrollbar-none overflow-y-auto">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 pb-4">
+              {notes.map((note) => (
+                <Card
+                  key={note.id}
+                  className="flex w-full items-center justify-between p-5"
+                >
+                  <div className="min-w-0">
+                    <h3 className="truncate font-medium text-gray-900">
+                      {note.title}
+                    </h3>
 
-                  <p className="mt-1 truncate text-sm text-gray-500">
-                    {note.description}
-                  </p>
-                </div>
+                    <p className="mt-1 truncate text-sm text-gray-500">
+                      {note.description}
+                    </p>
+                  </div>
 
-                {note.source === "ai" && (
-                  <span className="shrink-0 rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700">
-                    🤖 AI
-                  </span>
-                )}
-              </Card>
-            ))}
+                  {note.source === "ai" && (
+                    <span className="shrink-0 rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700">
+                      🤖 AI
+                    </span>
+                  )}
+                </Card>
+              ))}
+            </div>
           </div>
         )}
       </Card>

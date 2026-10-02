@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Dialog, Input } from "../components/common/index";
+import {
+  Button,
+  Card,
+  Dialog,
+  Input,
+  Select,
+} from "../components/common/index";
 import type { Note } from "../types/note";
 import NoteForm from "../components/notes/NoteForm/NoteForm";
 import { useNotesContext } from "../contexts/NotesContext";
@@ -82,21 +88,19 @@ function Notes() {
     <>
       <div className="flex h-full min-h-0 flex-col">
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between mb-6">
-          <Card className="w-[-webkit-fill-available] mr-6 p-2">
+        <div className="flex shrink-0 items-center justify-between mb-5">
+          <Card className="w-[-webkit-fill-available] mr-5 p-3">
             <div className="flex justify-between items-center">
               <div className="flex w-full mr-4">
-                <select
+                <Select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-2 mr-4 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 w-40"
-                >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
+                  options={categories.map((category) => ({
+                    label: category,
+                    value: category,
+                  }))}
+                  className="mr-4 w-40"
+                />
 
                 <Input
                   placeholder="Search notes..."
@@ -144,12 +148,12 @@ function Notes() {
 
         {/* Notes */}
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-          <div className="grid grid-cols-1 gap-6 pb-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 pb-5 md:grid-cols-2 xl:grid-cols-3">
             {filteredNotes.map((note) => (
               <Card key={note.id} className="flex flex-col h-52.5">
                 <h3 className="text-lg font-semibold">{note.title}</h3>
 
-                <p className="mt-2 line-clamp-3 text-sm text-gray-600">
+                <p className="mt-2 line-clamp-4 text-sm text-gray-600">
                   {note.description}
                 </p>
 
@@ -201,6 +205,7 @@ function Notes() {
             setIsNoteDialogOpen(false);
             setEditingNote(null);
           }}
+          scrollable
         >
           <NoteForm editingNote={editingNote} onAddNote={handleSaveNote} />
         </Dialog>

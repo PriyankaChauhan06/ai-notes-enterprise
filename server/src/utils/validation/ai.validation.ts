@@ -42,3 +42,7 @@ export const agentAskSchema = z.object({
     .max(2000, "Question is too long"),
   conversationId: z.string().trim().optional(),
 });
+
+export const analyticsRangeSchema = z.object({
+  range: z.enum(["today", "7d", "30d"]).optional(),
+});

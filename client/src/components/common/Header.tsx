@@ -10,12 +10,22 @@ function Header() {
   currentPage =
     currentPage?.charAt(0).toUpperCase() + currentPage.slice(1).toLowerCase();
 
+  let description = "Welcome";
+  if (currentPage == "Ai-assistant") {
+    currentPage = "AI Assistant";
+    description = `Ask questions, generate notes, and manage your knowledge with AI`;
+  } else if (currentPage == "Notes") {
+    description = "View your Notes";
+  } else if (currentPage == "Dashboard") {
+    description = "Note Summary and Insights";
+  }
+
   return (
     <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
       <div>
         <h2 className="text-lg font-semibold">{currentPage}</h2>
 
-        <p className="text-sm text-gray-500">Welcome</p>
+        <p className="text-sm text-gray-500">{description}</p>
       </div>
 
       <div className="flex items-center">

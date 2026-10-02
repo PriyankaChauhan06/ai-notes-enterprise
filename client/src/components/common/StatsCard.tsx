@@ -9,9 +9,7 @@ interface StatsCardProps {
 
 function StatsCard({ title, value, icon, description }: StatsCardProps) {
   return (
-    <div
-      className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm w-full"
-    >
+    <div className="h-full w-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500">

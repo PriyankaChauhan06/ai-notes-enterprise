@@ -45,6 +45,7 @@ export interface AIConversation {
   messages: AIConversationMessage[];
   createdAt: string;
   updatedAt: string;
+  // sources?: AIHistorySource[];
 }
 
 // export interface AIConversation {
@@ -65,16 +66,13 @@ export interface AskAIRequest {
   conversationId?: string | null;
 }
 
-export interface AskAIResponse {
+export interface AskAIResult {
   conversationId: string;
   answer: string;
-
   createdNote?: Note;
   deletedNote?: Note;
   updatedNote?: Note;
-
   conversationDeleted?: boolean;
-
   pendingAction?: {
     actionType: "delete_note" | "update_note";
     noteId: string;
@@ -85,4 +83,10 @@ export interface AskAIResponse {
       tags?: string[];
     };
   };
+  sources?: AISource[];
+}
+
+export interface AskAIResponse {
+  success: boolean;
+  data: AskAIResult;
 }

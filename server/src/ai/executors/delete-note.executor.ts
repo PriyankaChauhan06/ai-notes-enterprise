@@ -1,11 +1,12 @@
 import { Types } from "mongoose";
 import { deleteNote } from "../../services/note.service";
+import { deleteNoteToolSchema } from "../../utils/validation/agent.validation";
 
 export async function executeDeleteNote(userId: string, args: unknown) {
-  const { noteId } = args as { noteId: string };
-  if (!Types.ObjectId.isValid(noteId)) throw new Error("Invalid note ID");
+  const data = deleteNoteToolSchema.parse(args);
+  if (!Types.ObjectId.isValid(data.noteId)) throw new Error("Invalid note ID");
 
-  const note = await deleteNote(userId, noteId);
+  const note = await deleteNote(userId, data.noteId);
   return {
     deletedNote: {
       id: note._id.toString(),

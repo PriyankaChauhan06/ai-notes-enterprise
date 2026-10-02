@@ -19,6 +19,9 @@ function Login() {
 
   const successMessage = location.state?.message;
 
+  error && console.error("Login Error: ", error);
+  successMessage && console.info("Login successMessage: ", successMessage);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -60,12 +63,12 @@ function Login() {
         </div>
       )}
       {{{error && (
-        <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
           {error}
         </div>
       )} } --- use toast notification instear of this --- */}
 
-      <div className="flex min-h-screen items-center justify-center bg-black/10 p-4 sm:p-6 lg:px-16">
+      <div className="flex min-h-screen items-center justify-center bg-black/10 p-4 sm:p-5 lg:px-16">
         <img
           src={AInoteLogo}
           alt="NoteMind"
@@ -73,7 +76,7 @@ function Login() {
           style={{ position: "absolute", top: "16px", right: "24px" }}
         />
 
-        <div className="w-full max-w-lg rounded-3xl bg-white/95 p-6 shadow-2xl backdrop-blur-sm sm:p-8">
+        <div className="w-full max-w-lg rounded-3xl bg-white/95 p-5 shadow-2xl backdrop-blur-sm sm:p-8">
           {/* Logo */}
           <div className="mb-8 flex justify-center">
             <img src={AInoteLogo} alt="NoteMind" className="h-24 w-auto" />
@@ -134,7 +137,7 @@ function Login() {
           </form>
 
           {/* Divider */}
-          <div className="my-6 flex items-center gap-4">
+          <div className="my-5 flex items-center gap-4">
             <div className="h-px flex-1 bg-gray-200" />
 
             <span className="text-sm text-gray-400">OR</span>

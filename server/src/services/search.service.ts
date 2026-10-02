@@ -1,11 +1,13 @@
 import { Types } from "mongoose";
 import NoteChunk from "../models/NoteChunk";
+import { SemanticSearchData } from "../types/search";
 import { generateEmbedding } from "./embedding.service";
 
-interface SemanticSearchData {
-  userId: string;
-  query: string;
-}
+const MAX_CHUNKS_PER_NOTE = 2;
+const RAG_NUM_CANDIDATES = 50;
+const RAG_VECTOR_LIMIT = 20;
+const RAG_RESULT_LIMIT = 5;
+const RAG_MIN_SCORE = 0.7; // 0.75
 
 export async function semanticSearch({ userId, query }: SemanticSearchData) {
   const queryEmbedding = await generateEmbedding(query);
@@ -18,8 +20,8 @@ export async function semanticSearch({ userId, query }: SemanticSearchData) {
         index: "note_chunk_vector_index",
         path: "embedding",
         queryVector: queryEmbedding,
-        numCandidates: 50,
-        limit: 8,
+        numCandidates: RAG_NUM_CANDIDATES,
+        limit: RAG_VECTOR_LIMIT,
         filter: { userId: userObjectId },
       },
     },
@@ -32,9 +34,34 @@ export async function semanticSearch({ userId, query }: SemanticSearchData) {
         score: { $meta: "vectorSearchScore" },
       },
     },
-    { $match: { score: { $gte: 0.7 } } }, // 0.75
-    { $limit: 5 },
+    { $match: { score: { $gte: RAG_MIN_SCORE } } },
+    { $limit: RAG_RESULT_LIMIT },
   ]);
 
-  return results;
+  const finalResults: typeof results = [];
+  const noteChunkCount = new Map<string, number>();
+
+  for (const result of results) {
+    const noteId = result.noteId.toString();
+    const count = noteChunkCount.get(noteId) ?? 0;
+
+    if (count >= MAX_CHUNKS_PER_NOTE) {
+      continue;
+    }
+
+    finalResults.push(result);
+    noteChunkCount.set(noteId, count + 1);
+  }
+
+  // results?.length &&
+  //   console.log(
+  //     "results: ",
+  //     results.map((result) => ({
+  //       noteId: result.noteId.toString(),
+  //       score: result.score,
+  //       chunkIndex: result.chunkIndex,
+  //     })),
+  //   );
+
+  return finalResults;
 }
