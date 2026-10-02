@@ -21,7 +21,6 @@ function useAgentAnalytics() {
 
       setAnalytics(result);
     } catch (error) {
-      console.error("Failed to load analytics:", error);
       setAnalyticsError("Failed to load analytics.");
     } finally {
       setIsAnalyticsLoading(false);

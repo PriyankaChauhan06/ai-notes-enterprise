@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function OAuthCallback() {
@@ -27,7 +27,8 @@ export default function OAuthCallback() {
           replace: true,
         });
       } catch (error) {
-        console.error("Google login failed:", error);
+        console.error("Google login error:", error);
+        toast.error("Google login failed. Please try again.");
 
         navigate("/", {
           replace: true,

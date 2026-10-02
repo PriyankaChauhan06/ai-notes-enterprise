@@ -97,12 +97,6 @@ export async function askWithRAG({ userId, question }: AskWithRAGData) {
     { noteId: string; title: string; category: string; score: number }
   >();
 
-  // console.info("RAG retrieval completed", {
-  //   context,
-  //   chunksRetrieved: relevantChunks.length,
-  //   sourcesFound: sourceMap.size,
-  // });
-
   for (const chunk of relevantChunks) {
     const note = noteMap.get(chunk.noteId.toString());
 

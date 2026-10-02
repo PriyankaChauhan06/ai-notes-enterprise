@@ -1,7 +1,23 @@
+import { useState } from "react";
+import toast from "react-hot-toast";
+
 import type { NoteCardProps } from "../../../types/note-card-props";
-import { Button, Card } from "../../../components/common";
+import { Button, Card, Dialog } from "../../../components/common";
 
 function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const handleDelete = () => {
+    try {
+      onDelete(note.id);
+      setIsDeleteDialogOpen(false);
+      // toast.success("Note deleted successfully.");
+    } catch (error) {
+      console.error("Delete note error:", error);
+      toast.error("Failed to delete note.");
+    }
+  };
+
   return (
     <div className="mb-2 p-2">
       <Card>
@@ -25,12 +41,37 @@ function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
               Edit
             </Button>
 
-            <Button variant="danger" onClick={() => onDelete(note.id)}>
+            <Button
+              variant="danger"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
               Delete
             </Button>
           </div>
         </div>
       </Card>
+
+      <Dialog
+        open={isDeleteDialogOpen}
+        title="Delete Note?"
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <p>
+          Are you sure you want to delete <strong>{note.title}</strong>?
+        </p>
+
+        <p className="mt-2 text-sm text-gray-500">
+          This action cannot be undone.
+        </p>
+
+        <div className="mt-5 flex justify-end gap-2">
+          <Button onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+
+          <Button variant="danger" onClick={handleDelete}>
+            Delete
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 import type { ErrorRequestHandler } from "express";
-
 import { AppError } from "../utils/app-error";
+import { logger } from "../utils/logger";
 
 export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
-  console.error(error);
+  logger.error(error);
 
   if (error instanceof AppError) {
     res.status(error.statusCode).json({

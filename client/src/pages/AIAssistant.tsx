@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { askAI, generateAI, getAIHistory } from "../services/ai.service";
-import { formatCost, formatTokens } from "../utils/helpers";
 import { useNotesContext } from "../contexts/NotesContext";
 import type { AnalyticsRange } from "../types/analytics";
+import { formatCost, formatTokens } from "../utils/helpers";
 import { getApiErrorMessage } from "../utils/api-error";
 import { ANALYTICS } from "../constants/analytics";
 import useAgentAnalytics from "../hooks/useAgentAnalytics";
@@ -36,14 +37,14 @@ function AIAssistant() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [pendingAction, setPendingAction] = useState<PendingAction | null>(
-    null,
-  );
-  const [error, setError] = useState("");
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isAnalyticsSectionOpen, setIsAnalyticsSectionOpen] = useState(true);
   const [isToolUsageOpen, setIsToolUsageOpen] = useState(false);
   const [aIRundOpen, setAIRundOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(
+    null,
+  );
+
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   const { addNote, addNoteToState, updateNoteInState, removeNoteFromState } =
@@ -58,14 +59,7 @@ function AIAssistant() {
     changeAnalyticsRange,
   } = useAgentAnalytics();
 
-  const {
-    runs,
-    isLoading: isRunsLoading,
-    error: runsError,
-    loadRuns,
-  } = useAgentRuns();
-
-  error && console.error("AIAssistant Error: ", error);
+  const { runs, isLoading: isRunsLoading, loadRuns } = useAgentRuns();
 
   useEffect(() => {
     async function loadHistory() {
@@ -80,6 +74,7 @@ function AIAssistant() {
         setHistory(sortedHistory);
       } catch (error) {
         console.error("Failed to load AI history:", error);
+        toast.error("Failed to load AI history.");
       } finally {
         setIsHistoryLoading(false);
       }
@@ -117,7 +112,6 @@ function AIAssistant() {
 
     const currentPrompt = prompt.trim();
 
-    setError("");
     setResponse("");
     setSources([]);
     setGeneratedNote(null);
@@ -171,14 +165,14 @@ function AIAssistant() {
         setSources([]);
         setGeneratedNote(null);
         setPendingAction(null);
-        setError("");
 
         const result = await generateAI(currentPrompt);
         setResponse(result.response);
         setGeneratedNote(result.note);
       }
     } catch (error) {
-      setError(getApiErrorMessage(error));
+      console.error("AI generation error:", getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsGenerating(false);
     }
@@ -188,11 +182,10 @@ function AIAssistant() {
     if (!generatedNote) return;
 
     if (!generatedNote.title.trim() || !generatedNote.description.trim()) {
-      setError("Title and description are required.");
+      toast.error("Title and description are required.");
       return;
     }
 
-    setError("");
     setIsSaving(true);
 
     try {
@@ -208,7 +201,8 @@ function AIAssistant() {
       setResponse("");
       setPrompt("");
     } catch (error) {
-      setError(getApiErrorMessage(error));
+      console.error("Failed to save note:", getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -216,7 +210,7 @@ function AIAssistant() {
 
   async function handleRegenerate() {
     if (!prompt.trim()) {
-      setError("Enter a prompt first.");
+      toast.error("Enter a prompt first.");
       return;
     }
 
@@ -229,14 +223,13 @@ function AIAssistant() {
     try {
       await navigator.clipboard.writeText(response);
     } catch {
-      setError("Unable to copy response.");
+      toast.error("Unable to copy response.");
     }
   }
 
   async function handleConfirmAction() {
     if (!conversationId || !pendingAction) return;
 
-    setError("");
     setIsGenerating(true);
 
     try {
@@ -276,7 +269,8 @@ function AIAssistant() {
         );
       }
     } catch (error) {
-      setError(getApiErrorMessage(error));
+      console.error("AI action error:", getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsGenerating(false);
     }
@@ -285,7 +279,6 @@ function AIAssistant() {
   async function handleCancelAction() {
     if (!conversationId || !pendingAction) return;
 
-    setError("");
     setIsGenerating(true);
 
     try {
@@ -301,7 +294,8 @@ function AIAssistant() {
         result.answer,
       );
     } catch (error) {
-      setError(getApiErrorMessage(error));
+      console.error("AI action error:", getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsGenerating(false);
     }
@@ -321,7 +315,6 @@ function AIAssistant() {
     setGeneratedNote(null);
     setSources([]);
     setPendingAction(null);
-    setError("");
   }
 
   function handleNewChat() {
@@ -331,7 +324,6 @@ function AIAssistant() {
     setSources([]);
     setGeneratedNote(null);
     setPendingAction(null);
-    setError("");
   }
 
   function updateConversationHistory(
@@ -426,13 +418,6 @@ function AIAssistant() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {/* Error }
-      {error && (
-        <div className="mb-5 shrink-0 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-          {error}
-        </div>
-      ) */}
-
       {/* Mode Selector / Prompt Composer */}
       <div className="flex justify-end items-center mb-5">
         <div className="border rounded-xl border-gray-200 bg-white w-[-webkit-fill-available] flex items-end gap-3 p-2">
@@ -448,7 +433,6 @@ function AIAssistant() {
               disabled={isGenerating}
               onChange={(e) => {
                 setPrompt(e.target.value);
-                setError("");
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -761,8 +745,6 @@ function AIAssistant() {
                   <div className="border-t border-gray-200 p-3">
                     {isRunsLoading ? (
                       <p className="text-sm text-gray-500">Loading runs...</p>
-                    ) : runsError ? (
-                      <p className="text-sm text-red-600">{runsError}</p>
                     ) : runs.length === 0 ? (
                       <p className="text-sm text-gray-500">No AI runs yet.</p>
                     ) : (
@@ -847,7 +829,6 @@ function AIAssistant() {
                       setSources([]);
                       setGeneratedNote(null);
                       setPendingAction(null);
-                      setError("");
                     }}
                     className={`w-full rounded-lg border p-2 text-left transition ${
                       conversation._id === conversationId
@@ -948,7 +929,7 @@ function AIAssistant() {
           open={Boolean(pendingAction)}
           title="Confirm action"
           onClose={handleCancelAction}
-          scrollable
+          className="min-h-auto"
         >
           <div className="space-y-5">
             {/* Action description */}

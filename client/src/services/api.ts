@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { notifyAuthLogout } from "../utils/auth-events";
+import { startApiLoading, stopApiLoading } from "../utils/loading-events";
 import {
   getAccessToken,
   setAccessToken,
@@ -22,6 +23,8 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    startApiLoading();
+
     const token = getAccessToken();
 
     if (token) {
@@ -30,13 +33,21 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error),
+  (error: AxiosError) => {
+    stopApiLoading();
+    return Promise.reject(error);
+  },
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    stopApiLoading();
+    return response;
+  },
 
   async (error: AxiosError) => {
+    stopApiLoading();
+
     const originalRequest = error.config as AuthRequestConfig;
 
     if (

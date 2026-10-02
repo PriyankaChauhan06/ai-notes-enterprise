@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { Button, Input } from "../components/common";
 import loginBg from "../assets/background.png";
 import AInoteLogo from "../assets/AInote-logo.svg";
@@ -13,19 +14,12 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  error && console.error("Registration Error: ", error);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    setError("");
 
     if (
       !name.trim() ||
@@ -33,12 +27,12 @@ function Register() {
       !password.trim() ||
       !confirmPassword.trim()
     ) {
-      alert("Please fill all fields.");
+      toast.error("Please fill all fields.");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -52,7 +46,8 @@ function Register() {
         state: { message: "Account created successfully. Please log in." },
       });
     } catch (error) {
-      setError(getApiErrorMessage(error));
+      console.error("Register error:", getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsLoading(false);
     }

@@ -12,6 +12,7 @@ import { validateCreateIntent } from "../ai/action-guard";
 import { recordAgentRun } from "./agent-run.service";
 import { calculateModelCost } from "../ai/model-pricing";
 import { deleteNote, getNoteById, updateNote } from "./note.service";
+import { logger } from "../utils/logger";
 
 const MAX_AGENT_TURNS = 5;
 const MAX_AGENT_TOOL_CALLS = 10;
@@ -92,7 +93,7 @@ async function updateConversationSummary(conversation: any) {
     conversation.summary = summary;
     await conversation.save();
   } catch (error) {
-    console.error("Failed to update conversation summary:", error);
+    logger.error("Failed to update conversation summary:", error);
   }
 }
 

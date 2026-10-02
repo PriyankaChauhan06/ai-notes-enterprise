@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 import { Button, Input, GoogleLoginButton } from "../components/common";
 import loginBg from "../assets/background.png";
 import AInoteLogo from "../assets/AInote-logo.svg";
@@ -13,14 +14,8 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
 
   const { login, isLoading } = useAuth();
-
-  const successMessage = location.state?.message;
-
-  error && console.error("Login Error: ", error);
-  successMessage && console.info("Login successMessage: ", successMessage);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,7 +26,8 @@ function Login() {
       const from = location.state?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
     } catch (error) {
-      setError(getApiErrorMessage(error));
+      console.error("Login error:", getApiErrorMessage(error));
+      toast.error(getApiErrorMessage(error));
     }
   };
 
@@ -57,17 +53,6 @@ function Login() {
         backgroundImage: `url(${loginBg})`,
       }}
     >
-      {/* successMessage && (
-        <div className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
-          {successMessage}
-        </div>
-      )}
-      {{{error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
-          {error}
-        </div>
-      )} } --- use toast notification instear of this --- */}
-
       <div className="flex min-h-screen items-center justify-center bg-black/10 p-4 sm:p-5 lg:px-16">
         <img
           src={AInoteLogo}
@@ -148,19 +133,10 @@ function Login() {
           {/* Social buttons - UI only */}
           <GoogleLoginButton
             onError={(message) => {
-              setError(message);
+              console.error("Google login error:", message);
+              toast.error(message);
             }}
           />
-
-          {/* <button
-            type="button"
-            className="rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 active:bg-gray-100 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            onClick={() => {
-              window.location.href = "http://localhost:5000/api/auth/google";
-            }}
-          >
-            Google
-          </button> */}
 
           {/* Register */}
           <p className="mt-8 text-center text-sm text-gray-500">

@@ -8,8 +8,6 @@ function useLocalStorage<T>(key: string, initialValue: T) {
 
       return JSON.parse(storedValue) as T;
     } catch (error) {
-      console.error(`Failed to read localStorage key "${key}":`, error);
-
       return initialValue;
     }
   });
@@ -18,7 +16,6 @@ function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
-      console.error(`Failed to write localStorage key "${key}":`, error);
     }
   }, [key, value]);
 

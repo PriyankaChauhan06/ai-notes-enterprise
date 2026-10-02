@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
   createNote as createNoteApi,
   deleteNote as deleteNoteApi,
@@ -19,14 +20,14 @@ function useNotes() {
   const loadNotes = useCallback(async () => {
     try {
       setIsLoading(true);
-
       const note = await getNotes();
       setNotes(note);
 
       const category = await getAllCategory();
       setCategory(category);
     } catch (error) {
-      console.error("Failed to load notes:", error);
+      console.error("Load notes error:", error);
+      toast.error("Failed to load notes.");
     } finally {
       setIsLoading(false);
     }

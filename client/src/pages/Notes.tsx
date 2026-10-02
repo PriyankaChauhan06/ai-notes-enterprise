@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import {
   Button,
   Card,
@@ -14,6 +15,8 @@ function Notes() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   const { notes, categories, addNote, updateNote, deleteNote, toggleFavorite } =
@@ -41,6 +44,7 @@ function Notes() {
           category,
           tags,
         });
+        // toast.success("Note updated successfully.");
       } else {
         await addNote({
           title,
@@ -49,12 +53,44 @@ function Notes() {
           tags,
           source: "manual",
         });
+        // toast.success("Note created successfully.");
       }
 
       setIsNoteDialogOpen(false);
       setEditingNote(null);
     } catch (error) {
-      console.error("Failed to save note:", error);
+      console.error("Save note error:", error);
+      toast.error("Failed to save note.");
+    }
+  };
+
+  const handleOpenDeleteDialog = (note: Note) => {
+    setNoteToDelete(note);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setNoteToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!noteToDelete) return;
+
+    try {
+      await deleteNote(noteToDelete.id);
+
+      if (editingNote?.id === noteToDelete.id) {
+        setEditingNote(null);
+        setIsNoteDialogOpen(false);
+      }
+
+      handleCloseDeleteDialog();
+
+      // toast.success("Note deleted successfully.");
+    } catch (error) {
+      console.error("Delete note error:", error);
+      toast.error("Failed to delete note.");
     }
   };
 
@@ -76,7 +112,7 @@ function Notes() {
 
       return matchesSearch && matchesFavorite && matchesCategory;
     });
-  }, [notes, searchTerm, showFavoritesOnly, selectedCategory]);
+  }, [notes, searchTerm, showFavoritesOnly, selectedCategory, categories]);
 
   useEffect(() => {
     if (categories.length > 0 && !categories.includes(selectedCategory)) {
@@ -177,18 +213,7 @@ function Notes() {
                   {/* Delete */}
                   <Button
                     variant="danger"
-                    onClick={async () => {
-                      try {
-                        await deleteNote(note.id);
-
-                        if (editingNote?.id === note.id) {
-                          setEditingNote(null);
-                          setIsNoteDialogOpen(false);
-                        }
-                      } catch (error) {
-                        console.error("Failed to delete note:", error);
-                      }
-                    }}
+                    onClick={() => handleOpenDeleteDialog(note)}
                   >
                     Delete
                   </Button>
@@ -198,6 +223,7 @@ function Notes() {
           </div>
         </div>
 
+        {/* Create / Edit Note Dialog */}
         <Dialog
           open={isNoteDialogOpen}
           title={editingNote ? "Edit Note" : "Create Note"}
@@ -208,6 +234,26 @@ function Notes() {
           scrollable
         >
           <NoteForm editingNote={editingNote} onAddNote={handleSaveNote} />
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          title="Delete Note?"
+          onClose={handleCloseDeleteDialog}
+          className="min-h-auto"
+        >
+          <div>
+            Are you sure you want to delete{" "}
+            <strong>{noteToDelete?.title}</strong>?
+          </div>
+
+          <div className="mt-5 flex justify-end gap-2">
+            <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+            <Button variant="danger" onClick={handleConfirmDelete}>
+              Delete
+            </Button>
+          </div>
         </Dialog>
       </div>
     </>

@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { redisClient } from "../config/redis";
+import { logger } from "../utils/logger";
 
 const WINDOW_SECONDS = 60;
 const MAX_REQUESTS = 10;
@@ -36,7 +37,7 @@ export async function aiRateLimit(
 
     next();
   } catch (error) {
-    console.error("AI rate limiter error:", error);
+    logger.error("AI rate limiter error:", error);
 
     return res.status(503).json({
       success: false,

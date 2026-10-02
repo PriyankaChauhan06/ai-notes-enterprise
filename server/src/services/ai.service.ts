@@ -79,12 +79,6 @@ export async function generateAI(data: GenerateAIData) {
     });
 
     if (result.status !== "completed") {
-      console.error("OpenAI incomplete response:", {
-        status: result.status,
-        incompleteDetails: result.incomplete_details,
-        outputText: result.output_text,
-      });
-
       throw new AppError("AI response was incomplete", 503);
     }
 

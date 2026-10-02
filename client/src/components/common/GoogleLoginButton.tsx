@@ -60,7 +60,6 @@ export default function GoogleLoginButton({ onError }: GoogleLoginButtonProps) {
               replace: true,
             });
           } catch (error) {
-            console.error(error);
             onError?.("Google login failed. Please try again.");
           }
         },

@@ -6,6 +6,7 @@ interface DialogProps {
   children: ReactNode;
   onClose: () => void;
   scrollable?: boolean;
+  className?: string;
 }
 
 function Dialog({
@@ -14,6 +15,7 @@ function Dialog({
   children,
   onClose,
   scrollable = false,
+  className = "",
 }: DialogProps) {
   if (!open) {
     return null;
@@ -22,14 +24,12 @@ function Dialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div
-        className="flex w-full max-w-lg max-h-[80vh] min-h-[300px] flex-col rounded-2xl bg-white p-5 shadow-xl"
+        className={`flex w-full max-w-lg max-h-[80vh] min-h-[300px] flex-col rounded-2xl bg-white p-5 shadow-xl ${className}`}
         onClick={(event) => event.stopPropagation()}
       >
         {/* Header */}
         <div className="mb-4 flex shrink-0 items-center justify-between">
-          <h2 className="text-xl font-semibold text-purple-900">
-            {title}
-          </h2>
+          <h2 className="text-xl font-semibold text-purple-900">{title}</h2>
 
           <button
             type="button"
