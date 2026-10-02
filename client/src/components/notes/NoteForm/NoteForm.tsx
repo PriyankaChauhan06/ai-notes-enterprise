@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import type { NoteFormProps } from "../../../types/note-form-props";
 import { Input, Button, Textarea } from "../../../components/common/index";
 
@@ -24,7 +25,7 @@ function NoteForm({ onAddNote, editingNote }: NoteFormProps) {
 
   function handleSubmit() {
     if (!title.trim() || !description.trim()) {
-      alert("Please fill all fields");
+      toast.error("Please fill all fields");
       return;
     }
 

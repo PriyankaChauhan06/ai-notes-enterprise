@@ -53,15 +53,5 @@ export async function semanticSearch({ userId, query }: SemanticSearchData) {
     noteChunkCount.set(noteId, count + 1);
   }
 
-  // results?.length &&
-  //   console.log(
-  //     "results: ",
-  //     results.map((result) => ({
-  //       noteId: result.noteId.toString(),
-  //       score: result.score,
-  //       chunkIndex: result.chunkIndex,
-  //     })),
-  //   );
-
   return finalResults;
 }
