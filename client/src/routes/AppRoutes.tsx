@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
 import Notes from "../pages/Notes";
 import Register from "../pages/Register";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 import NotFound from "../pages/NotFound";
 import Dashboard from "../pages/Dashboard";
 import AIAssistant from "../pages/AIAssistant";
@@ -15,6 +17,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>

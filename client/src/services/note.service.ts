@@ -34,10 +34,7 @@ export async function getAllCategory(): Promise<string[]> {
 
   const categories = response.data.data;
 
-  if (categories?.length) {
-    categories.unshift("All");
-  }
-
+  categories.unshift("All");
   return categories;
 }
 

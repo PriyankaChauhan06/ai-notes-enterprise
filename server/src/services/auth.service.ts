@@ -119,3 +119,48 @@ export async function loginWithGoogle(data: GoogleUserData) {
     user: { id: user._id, name: user.name, email: user.email },
   };
 }
+
+export async function createPasswordResetToken(email: string) {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return null;
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+  await user.save();
+
+  return { resetToken, email: user.email };
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpiresAt: { $gt: new Date() },
+  }).select("+passwordResetToken +passwordResetExpiresAt");
+
+  if (!user) {
+    throw new AppError("Invalid or expired reset token", 400);
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  user.password = hashedPassword;
+
+  // Token ko immediately invalidate karo.
+  user.passwordResetToken = undefined;
+  user.passwordResetExpiresAt = undefined;
+
+  await user.save();
+}

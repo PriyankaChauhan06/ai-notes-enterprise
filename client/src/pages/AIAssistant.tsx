@@ -45,10 +45,12 @@ function AIAssistant() {
     null,
   );
 
-  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const noteEndRef = useRef<HTMLDivElement | null>(null);
 
   const { addNote, addNoteToState, updateNoteInState, removeNoteFromState } =
     useNotesContext();
+
+  const { runs, isLoading: isRunsLoading, loadRuns } = useAgentRuns();
 
   const {
     analytics,
@@ -58,8 +60,6 @@ function AIAssistant() {
     loadAnalytics,
     changeAnalyticsRange,
   } = useAgentAnalytics();
-
-  const { runs, isLoading: isRunsLoading, loadRuns } = useAgentRuns();
 
   useEffect(() => {
     async function loadHistory() {
@@ -98,9 +98,7 @@ function AIAssistant() {
       (message) => message.role === "user",
     );
 
-    if (!firstUserMessage) {
-      return "New Chat";
-    }
+    if (!firstUserMessage) return "New Chat";
 
     const title = firstUserMessage.content.trim();
 
@@ -413,7 +411,7 @@ function AIAssistant() {
   useEffect(() => {
     if (mode !== "ask" || !selectedConversation) return;
 
-    chatEndRef.current?.scrollIntoView({ behavior: "instant", block: "end" });
+    noteEndRef.current?.scrollIntoView({ behavior: "instant", block: "end" });
   }, [conversationId, selectedConversation?.messages.length, mode]);
 
   return (
@@ -812,7 +810,7 @@ function AIAssistant() {
           {isHistoryLoading ? (
             <p className="text-sm text-gray-500">Loading history...</p>
           ) : history.length === 0 ? (
-            <p className="text-sm text-gray-500">No chats yet.</p>
+            <p className="text-sm text-gray-500">No notes yet.</p>
           ) : (
             <div className="space-y-3 scrollbar-none overflow-auto w-[-webkit-fill-available]">
               {history?.map((conversation) => {
@@ -910,7 +908,7 @@ function AIAssistant() {
                 ))}
 
                 {/* Auto-scroll target */}
-                <div ref={chatEndRef} />
+                <div ref={noteEndRef} />
               </div>
             )}
 

@@ -26,6 +26,16 @@ const userSchema = new Schema(
       unique: true,
       sparse: true,
     },
+
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+
+    passwordResetExpiresAt: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,
