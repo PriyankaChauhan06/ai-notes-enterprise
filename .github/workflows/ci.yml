@@ -25,13 +25,15 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: |
-            package-lock.json
+            client/package-lock.json
             server/package-lock.json
 
       - name: Install frontend dependencies
+        working-directory: client
         run: npm ci
 
       - name: Build frontend
+        working-directory: client
         run: npm run build
 
       - name: Install backend dependencies
