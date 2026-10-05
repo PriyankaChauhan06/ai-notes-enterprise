@@ -108,12 +108,12 @@ function Login() {
             </div>
 
             <div className="flex justify-end">
-              <button
-                type="button"
+              <Link
+                to="/forgot-password"
                 className="text-sm font-medium text-blue-600 hover:text-blue-700"
               >
                 Forgot password?
-              </button>
+              </Link>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

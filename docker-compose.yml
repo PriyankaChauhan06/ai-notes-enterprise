@@ -1,0 +1,38 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: ai-notes-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./server
+    container_name: ai-notes-backend
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5000:5000"
+    env_file:
+      - ./server/.env.docker
+
+  frontend:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: /api
+        VITE_GOOGLE_CLIENT_ID: 615321492476-96ceiia8tr75gtl6nr0p76rtchl19lrl.apps.googleusercontent.com
+    container_name: ai-notes-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:5173:80"

@@ -13,6 +13,10 @@ import { recordAgentRun } from "./agent-run.service";
 import { calculateModelCost } from "../ai/model-pricing";
 import { deleteNote, getNoteById, updateNote } from "./note.service";
 import { logger } from "../utils/logger";
+// import {
+//   getOrCreateAgentConversation,
+//   buildAgentInput,
+// } from "./agent-context.service";
 
 const MAX_AGENT_TURNS = 5;
 const MAX_AGENT_TOOL_CALLS = 10;
@@ -696,6 +700,7 @@ export async function runAgent({
     userId,
     question,
     conversation: await getOrCreateConversation(userId, conversationId),
+    // conversation: await getOrCreateAgentConversation(userId, conversationId),
     toolCallLogs: [],
     agentStartTime: Date.now(),
     hasRecordedRun: false,

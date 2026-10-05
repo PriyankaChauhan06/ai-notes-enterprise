@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getAIHistoryController } from "../controllers/ai-history.controller";
 import {
   agentAskController,
+  agentStreamController,
   generateAIController,
   getAgentAnalyticsController,
   getAgentRunsController,
@@ -41,6 +42,13 @@ router.post(
   aiRateLimit,
   validate(agentAskSchema),
   asyncHandler(agentAskController),
+);
+
+router.post(
+  "/agent/stream",
+  aiRateLimit,
+  validate(agentAskSchema),
+  asyncHandler(agentStreamController),
 );
 
 router.get("/history", asyncHandler(getAIHistoryController));

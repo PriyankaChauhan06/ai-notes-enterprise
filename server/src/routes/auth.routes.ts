@@ -2,19 +2,22 @@ import { Router } from "express";
 import {
   registerController,
   loginController,
-  loginSuccessfull,
   refreshTokenController,
   logoutController,
   googleCallbackController,
   getCurrentUserController,
   googleLoginController,
+  forgotPasswordController,
+  resetPasswordController,
 } from "../controllers/auth.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import {
+  forgotPasswordSchema,
   googleLoginSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
 } from "../utils/validation/auth.validation";
 import { asyncHandler } from "../utils/async-handler";
 import passport from "../config/passport";
@@ -56,6 +59,18 @@ router.post(
   "/google",
   validate(googleLoginSchema),
   asyncHandler(googleLoginController),
+);
+
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordSchema),
+  asyncHandler(forgotPasswordController),
+);
+
+router.post(
+  "/reset-password",
+  validate(resetPasswordSchema),
+  asyncHandler(resetPasswordController),
 );
 
 export default router;

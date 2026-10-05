@@ -1,17 +1,22 @@
 import type { Request, Response } from "express";
-import {
-  registerUser,
-  loginUser,
-  loginWithGoogle,
-} from "../services/auth.service";
+import crypto from "crypto";
+import { redisClient } from "../config/redis";
+import User from "../models/User";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
 } from "../utils/jwt";
 import { AppError } from "../utils/app-error";
-import { redisClient } from "../config/redis";
-import User from "../models/User";
+import { forgotPasswordSchema } from "../utils/validation/auth.validation";
+import {
+  registerUser,
+  loginUser,
+  loginWithGoogle,
+  createPasswordResetToken,
+  resetPassword,
+} from "../services/auth.service";
+import { sendPasswordResetEmail } from "../services/email.service";
 
 export async function registerController(req: Request, res: Response) {
   const user = await registerUser(req.body);
@@ -37,10 +42,6 @@ export async function loginController(req: Request, res: Response) {
       user: result.user,
     },
   });
-}
-
-export async function loginSuccessfull(req: Request, res: Response) {
-  res.status(200).json({ success: true, data: { userId: req.userId } });
 }
 
 export async function refreshTokenController(req: Request, res: Response) {
@@ -136,5 +137,32 @@ export async function googleLoginController(req: Request, res: Response) {
   res.json({
     success: true,
     data: { accessToken: result.accessToken, user: result.user },
+  });
+}
+
+export async function forgotPasswordController(req: Request, res: Response) {
+  const { email } = forgotPasswordSchema.parse(req.body);
+  
+  const result = await createPasswordResetToken(email);
+
+  if (result) {
+    await sendPasswordResetEmail(result.email, result.resetToken);
+  }
+
+  return res.status(200).json({
+    success: true,
+    message:
+      "If an account exists with this email, a password reset link has been sent.",
+  });
+}
+
+export async function resetPasswordController(req: Request, res: Response) {
+  const { token, newPassword } = req.body;
+
+  await resetPassword(token, newPassword);
+
+  return res.status(200).json({
+    success: true,
+    message: "Password reset successfully.",
   });
 }
