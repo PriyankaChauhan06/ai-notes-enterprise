@@ -29,7 +29,7 @@ services:
       context: ./client
       args:
         VITE_API_URL: /api
-        VITE_GOOGLE_CLIENT_ID: 615321492476-96ceiia8tr75gtl6nr0p76rtchl19lrl.apps.googleusercontent.com
+        VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
     container_name: ai-notes-frontend
     restart: unless-stopped
     depends_on:

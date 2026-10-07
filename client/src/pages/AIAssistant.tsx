@@ -52,8 +52,6 @@ function AIAssistant() {
 
   const { runs, isLoading: isRunsLoading, loadRuns } = useAgentRuns();
 
-  const selectedConversation = getConversation(conversationId);
-
   const {
     analytics,
     analyticsRange,
@@ -407,6 +405,8 @@ function AIAssistant() {
       setConversationId(result.conversationId);
     }
   }
+
+  const selectedConversation = getConversation(conversationId);
 
   useEffect(() => {
     if (mode !== "ask" || !selectedConversation) return;
