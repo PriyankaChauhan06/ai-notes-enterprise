@@ -55,19 +55,41 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Docker metadata - frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/priyankachauhan06/ai-notes-frontend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build and push frontend image
         uses: docker/build-push-action@v7
         with:
           context: ./client
           push: true
-          tags: ghcr.io/priyankachauhan06/ai-notes-frontend:latest
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
           build-args: |
             VITE_API_URL=/api
             VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}
+
+      - name: Docker metadata - backend
+        id: meta-backend
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/priyankachauhan06/ai-notes-backend
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push backend image
         uses: docker/build-push-action@v7
         with:
           context: ./server
           push: true
-          tags: ghcr.io/priyankachauhan06/ai-notes-backend:latest
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
